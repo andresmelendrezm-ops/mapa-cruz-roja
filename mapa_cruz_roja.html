@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8"/>
-<title>C5 Cruz Roja – Hermosillo</title>
+<title>Monitoreo Cruz Roja Hermosillo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
@@ -13,23 +13,40 @@ body { margin:0; font-family: Arial, sans-serif; background:#0b0f14; }
 #map { height:100vh; }
 
 /* PANEL C5 */
-.panel {
-  position:absolute;
-  top:15px;
-  left:15px;
-  width:260px;
-  background:#111821;
-  color:white;
-  padding:15px;
-  border-radius:12px;
-  box-shadow:0 0 20px rgba(0,0,0,0.6);
-  z-index:999;
-}
+.header-panel {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    text-align: center;
+    border-top: 5px solid #c40000;
+    min-width: 280px;
+    pointer-events: none; /* Permite hacer clic a través del panel al mapa */
+  }
 
-.panel h2 {
-  margin:0 0 10px 0;
-  color:#ff2b2b;
-}
+  .header-panel h3 { margin: 0; color: #c40000; font-size: 1.1rem; }
+  .header-panel p { margin: 2px 0 0 0; font-size: 0.85rem; color: #555; }
+  .status-dot { height: 10px; width: 10px; background: #2ecc71; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+  /* Ajuste para que el control de capas se vea bien */
+  .leaflet-top.leaflet-right { top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="header-panel">
+  <h3>CRUZ ROJA MEXICANA</h3>
+  <p><span class="status-dot"></span>Centro de Despacho | Sistema Operativo</p>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 .estado {
   padding:6px 10px;
@@ -45,13 +62,6 @@ body { margin:0; font-family: Arial, sans-serif; background:#0b0f14; }
 </style>
 </head>
 <body>
-
-<div id="map"></div>
-
-<div class="panel">
-  <h2>C5 Cruz Roja</h2>
-  <div id="info">Sistema activo</div>
-</div>
 
 <script>
 
@@ -90,11 +100,20 @@ var iconoAmbulancia = L.divIcon({
 
 // ================= HOSPITALES =================
 var hospitales = [
-["HGES","disponible",29.08149,-111.00376],
-["IMSS HGZ 14","saturado",29.09878,-111.00153],
-["IMSS HGZ 02","proceso",29.10370,-110.95337],
-["Hospital CIMA","disponible",29.06470,-110.96136],
-["Hospital Infantil","disponible",29.11639,-110.97176]
+["Hospital General de Especialidades","Disponible", 29.08149, -111.00376],
+["IMSS HGZ 14","Saturado", 29.09878, -111.00153],
+["IMSS HGZ 02","Saturado", 29.10370, -110.95337],
+["IMSS HGZ 15","Disponible", 29.08649, -110.96219],
+["Centro Médico del Noroeste","Disponible", 29.08141, -110.95062],
+["Hospital CIMA","Disponible", 29.06470, -110.96136],
+["Hospital San José","Disponible", 29.12069, -110.95190],
+["ISSSTE Dr. Fernando Ocaranza","Disponible", 29.11015, -110.95071],
+["SSA Hospital de la Mujer","Disponible", 29.11594, -110.97256],
+["Hospital Militar Regional","Disponible", 29.11487, -110.94862],
+["ISSSTESON Dr. Ignacio Chavez","Disponible", 29.09679, -110.95348],
+["Hospital San Diego de Alcala","Disponible", 29.08964, -110.95214],
+["Hospital Licona","Disponible", 29.08144, -110.94933],
+["SSA Hospital Infantil","Disponible", 29.11639, -110.97176]
 ];
 
 hospitales.forEach(h=>{
