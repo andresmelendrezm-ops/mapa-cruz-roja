@@ -11,7 +11,7 @@
     <style>
         :root {
             --rojo-cr: #FF0000;
-            --sidebar-bg: #000000;
+            --sidebar-bg: #DEDEDE;
             --card-bg: #FFFFFF;
             --text-main: #333333;
         }
@@ -259,7 +259,7 @@
 
     // Cargar Hospitales del archivo original
     var hospitalLayer = L.layerGroup().addTo(map);
-    [[29.0814, -111.0037, "Hospital General"], [29.0987, -111.0015, "IMSS 14"], [29.0647, -110.9613, "Hospital CIMA"]].forEach(h => {
+    [[29.0814, -111.0037, "Hospital General de Especialidades"], [29.0987, -111.0015, "IMSS HGZ 14"], [29.0647, -110.9613, "Hospital CIMA"]].forEach(h => {
         L.marker([h[0], h[1]], {icon: hospitalIcon}).bindPopup(h[2]).addTo(hospitalLayer);
     });
 
