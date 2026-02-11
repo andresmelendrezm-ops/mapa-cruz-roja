@@ -1,160 +1,239 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="utf-8"/>
-<title>Monitoreo Cruz Roja Hermosillo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PADSE - Cruz Roja Hermosillo</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --rojo-cr: #c40000;
+            --oscuro-sidebar: #1a1a1a;
+            --gris-fondo: #f4f7f6;
+            --blanco: #ffffff;
+        }
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--gris-fondo);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-<style>
-body { margin:0; font-family: Arial, sans-serif; background:#0b0f14; }
-#map { height:100vh; }
+        /* BARRA LATERAL (Inspirada en Canva) */
+        .sidebar {
+            width: 260px;
+            background-color: var(--oscuro-sidebar);
+            color: var(--blanco);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 2000;
+        }
 
-/* PANEL C5 */
-.header-panel {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    padding: 12px 30px;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 1000;
-    text-align: center;
-    border-top: 5px solid #c40000;
-    min-width: 280px;
-    pointer-events: none; /* Permite hacer clic a través del panel al mapa */
-  }
+        .logo-area {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+        }
 
-  .header-panel h3 { margin: 0; color: #c40000; font-size: 1.1rem; }
-  .header-panel p { margin: 2px 0 0 0; font-size: 0.85rem; color: #555; }
-  .status-dot { height: 10px; width: 10px; background: #2ecc71; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .logo-area h1 {
+            font-size: 1.2rem;
+            color: var(--rojo-cr);
+            margin: 0;
+            letter-spacing: 2px;
+        }
 
-  /* Ajuste para que el control de capas se vea bien */
-  .leaflet-top.leaflet-right { top: 10px; }
-</style>
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--rojo-cr);
+        }
+
+        /* CONTENIDO PRINCIPAL */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* HEADER SUPERIOR CENTRADO */
+        .header-top {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--blanco);
+            padding: 10px 40px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            text-align: center;
+            border-top: 4px solid var(--rojo-cr);
+            min-width: 350px;
+        }
+
+        .header-top h2 {
+            margin: 0;
+            color: var(--rojo-cr);
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        /* MAPA */
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* TARJETAS DE MÉTRICAS (Inspiradas en Canva) */
+        .stats-overlay {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .stat-card {
+            background: var(--blanco);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--rojo-cr);
+        }
+
+        .stat-card span {
+            display: block;
+            font-size: 0.75rem;
+            color: #777;
+            text-transform: uppercase;
+        }
+
+        .stat-card b {
+            font-size: 1.4rem;
+            color: #333;
+        }
+
+    </style>
 </head>
 <body>
 
-<div class="header-panel">
-  <h3>CRUZ ROJA MEXICANA</h3>
-  <p><span class="status-dot"></span>Centro de Despacho | Sistema Operativo</p>
-</div>
+    <div class="sidebar">
+        <div class="logo-area">
+            <h1>CRUZ ROJA</h1>
+            <small>HERMOSILLO</small>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active">🏠 Dashboard PADSE</li>
+            <li class="nav-item">🚑 Unidades Activas</li>
+            <li class="nav-item">🏥 Hospitales</li>
+            <li class="nav-item">📊 Reportes</li>
+        </ul>
+    </div>
 
-<div id="map"></div>
+    <div class="main-content">
+        <div class="header-top">
+            <h2>Cruz Roja Mexicana Centro de Despacho</h2>
+            <div class="status-badge">● SISTEMA OPERATIVO ACTIVO</div>
+        </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <div id="map"></div>
 
-.estado {
-  padding:6px 10px;
-  border-radius:6px;
-  margin-top:6px;
-  font-size:13px;
-}
+        <div class="stats-overlay">
+            <div class="stat-card">
+                <span>Servicios Hoy</span>
+                <b>18</b>
+            </div>
+            <div class="stat-card">
+                <span>Unidades en Ruta</span>
+                <b>04</b>
+            </div>
+            <div class="stat-card">
+                <span>Tiempo Promedio</span>
+                <b>08 min</b>
+            </div>
+        </div>
+    </div>
 
-.disponible { background:#1f8b4c; }
-.saturado { background:#b32020; }
-.proceso { background:#b38b1f; }
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-</style>
-</head>
-<body>
+    <script>
+        // Configuración del Mapa
+        var map = L.map('map', {
+            center: [29.09, -110.96],
+            zoom: 13,
+            zoomControl: false
+        });
 
-<script>
+        // Reubicar zoom
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// ================= MAPA BASE =================
-var map = L.map('map').setView([29.09, -110.96], 12);
+        // Capa Base (OpenStreetMap)
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'© OpenStreetMap'
-}).addTo(map);
+        // Capa Tráfico Google Maps
+        var googleTraffic = L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        });
 
-// ================= ICONOS =================
+        // Icono Hospitales
+        var hospitalIcon = L.icon({
+            iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684012.png",
+            iconSize: [30, 30],
+            iconAnchor: [15, 30]
+        });
 
-// hospital semaforizado
-function iconoHospital(color){
-  return L.divIcon({
-    html:`<div style="
-      width:22px;height:22px;
-      background:${color};
-      border:3px solid white;
-      border-radius:6px;
-      box-shadow:0 0 6px rgba(0,0,0,0.6);
-    "></div>`,
-    className:"",
-    iconSize:[22,22]
-  });
-}
+        // Marcadores Hospitales
+        var hospitales = L.layerGroup();
+        var dataH = [
+            ["H. General", 29.0814, -111.0037],
+            ["IMSS 14", 29.0987, -111.0015],
+            ["H. CIMA", 29.0647, -110.9613]
+        ];
 
-// ambulancia
-var iconoAmbulancia = L.divIcon({
-  html:`<div style="
-    font-size:20px;
-  ">🚑</div>`,
-  className:"",
-  iconSize:[20,20]
-});
+        dataH.forEach(h => {
+            L.marker([h[1], h[2]], {icon: hospitalIcon}).bindPopup(h[0]).addTo(hospitales);
+        });
+        hospitales.addTo(map);
 
-// ================= HOSPITALES =================
-var hospitales = [
-["Hospital General de Especialidades","Disponible", 29.08149, -111.00376],
-["IMSS HGZ 14","Saturado", 29.09878, -111.00153],
-["IMSS HGZ 02","Saturado", 29.10370, -110.95337],
-["IMSS HGZ 15","Disponible", 29.08649, -110.96219],
-["Centro Médico del Noroeste","Disponible", 29.08141, -110.95062],
-["Hospital CIMA","Disponible", 29.06470, -110.96136],
-["Hospital San José","Disponible", 29.12069, -110.95190],
-["ISSSTE Dr. Fernando Ocaranza","Disponible", 29.11015, -110.95071],
-["SSA Hospital de la Mujer","Disponible", 29.11594, -110.97256],
-["Hospital Militar Regional","Disponible", 29.11487, -110.94862],
-["ISSSTESON Dr. Ignacio Chavez","Disponible", 29.09679, -110.95348],
-["Hospital San Diego de Alcala","Disponible", 29.08964, -110.95214],
-["Hospital Licona","Disponible", 29.08144, -110.94933],
-["SSA Hospital Infantil","Disponible", 29.11639, -110.97176]
-];
+        // Control de Capas Interactivo
+        var overlays = {
+            "🏥 Ver Hospitales": hospitales,
+            "🚗 Tráfico en Tiempo Real": googleTraffic
+        };
 
-hospitales.forEach(h=>{
-  let color =
-    h[1]=="disponible" ? "#22c55e" :
-    h[1]=="saturado" ? "#ef4444" :
-    "#facc15";
+        L.control.layers(null, overlays, { collapsed: false }).addTo(map);
 
-  L.marker([h[2],h[3]],{icon:iconoHospital(color)})
-    .addTo(map)
-    .bindPopup(`<b>${h[0]}</b><br>Estado: ${h[1]}`);
-});
-
-// ================= AMBULANCIAS =================
-var ambulancias = [
-["SON-526",29.09,-110.97],
-["SON-528",29.07,-110.95],
-["SON-529",29.11,-110.98]
-];
-
-ambulancias.forEach(a=>{
-  L.marker([a[1],a[2]],{icon:iconoAmbulancia})
-    .addTo(map)
-    .bindPopup(`<b>Ambulancia ${a[0]}</b>`);
-});
-
-// ================= TRÁFICO (visual) =================
-L.tileLayer(
- "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
- {opacity:0.4}
-).addTo(map);
-
-// ================= CLIMA (requiere API) =================
-// reemplaza TU_API_KEY
-/*
-L.tileLayer(
- "https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=TU_API_KEY",
- {opacity:0.5}
-).addTo(map);
-*/
-
-</script>
+    </script>
 </body>
 </html>
