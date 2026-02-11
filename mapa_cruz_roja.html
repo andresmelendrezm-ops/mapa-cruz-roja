@@ -300,24 +300,53 @@
 
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTh7H5-srU1-anbqTEuHtC5BYciljJuqQP36afOD7OouN9jqeBHvHiMfRdGmHCdRG_MX2bGPoOjws07/pub?output=csv'; // <--- PEGA AQUÍ TU URL CSV DE GOOGLE SHEETS
 
-    async function loadHospitalDetails(targetName) {
-        try {
-            const response = await fetch(SHEET_CSV_URL);
-            const data = await response.text();
-            const rows = data.split('\n').slice(1); // Ignorar cabecera
+   async function loadHospitalDetails(targetName) {
+    // 1. Ocultamos el panel actual y limpiamos textos para dar feedback visual de que está cargando
+    const card = document.getElementById('hospital-info-card');
+    card.style.display = 'none'; 
+    
+    try {
+        // 2. Llamada al CSV de Google Sheets
+        const response = await fetch(SHEET_CSV_URL);
+        const data = await response.text();
+        
+        // 3. Dividir por líneas y limpiar espacios vacíos
+        const rows = data.split(/\r?\n/).filter(row => row.trim() !== "");
+        const rowsWithoutHeader = rows.slice(1);
 
-            const hospital = rows.find(row => row.includes(targetName));
+        // 4. Buscar coincidencia exacta del nombre
+        let hospitalEncontrado = null;
+        
+        for (let row of rowsWithoutHeader) {
+            // Usamos una expresión regular para separar por comas respetando si hay comas dentro de comillas
+            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             
-            if (hospital) {
-                const cols = hospital.split(',');
-                // Estructura esperada: Nombre, Lat, Lng, Capacidad, Telefono, Web
-                showInfoPanel(cols[0], cols[3], cols[4], cols[5], cols[1], cols[2]);
-            } else {
-                alert("Información no disponible en tiempo real para este hospital.");
+            // Comparamos el nombre (columna 0) quitando espacios y comillas extras
+            if (cols[0].replace(/["']/g, "").trim() === targetName.trim()) {
+                hospitalEncontrado = cols;
+                break;
             }
-        } catch (e) {
-            console.error("Error cargando datos de Sheets", e);
         }
+        
+        if (hospitalEncontrado) {
+            // Extraer datos: Nombre[0], Lat[1], Lng[2], Capacidad[3], Tel[4], Web[5]
+            const nombre = hospitalEncontrado[0].replace(/["']/g, "").trim();
+            const lat = parseFloat(hospitalEncontrado[1]);
+            const lng = parseFloat(hospitalEncontrado[2]);
+            const capacidad = hospitalEncontrado[3].replace(/["']/g, "").trim();
+            const tel = hospitalEncontrado[4].replace(/["']/g, "").trim();
+            const web = hospitalEncontrado[5].replace(/["']/g, "").trim();
+
+            // 5. Mostrar el panel con los nuevos datos
+            showInfoPanel(nombre, capacidad, tel, web, lat, lng);
+        } else {
+            alert("No se encontró información actualizada para: " + targetName + ". Verifique que el nombre en el Excel sea idéntico.");
+        }
+    } catch (e) {
+        console.error("Error de conexión con Google Sheets:", e);
+        alert("Error de conexión. Asegúrese de que el enlace de Google Sheets sea el de 'Publicar como CSV'.");
+    }
+}
     }
 
     function showInfoPanel(nombre, capacidad, tel, web, lat, lng) {
