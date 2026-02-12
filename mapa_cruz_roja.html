@@ -33,6 +33,31 @@
         .nav-item { padding: 15px 25px; display: flex; align-items: center; font-size: 14px; color: #555 !important; cursor: pointer; transition: 0.3s; }
         .nav-item.active { background-color: #1a1a1a; color: white !important; border-left: 4px solid var(--rojo-cr); }
 
+        /* BUSCADOR EN SIDEBAR */
+        .search-container { padding: 10px 15px; position: relative; }
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #bbb;
+            font-size: 12px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .search-results {
+            background: white;
+            position: absolute;
+            width: 210px;
+            z-index: 2000;
+            font-size: 11px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-height: 150px;
+            overflow-y: auto;
+            border-radius: 0 0 8px 8px;
+        }
+        .search-item { padding: 8px; cursor: pointer; border-bottom: 1px solid #eee; color: #333; }
+        .search-item:hover { background: #f0f0f0; }
+
         /* Estilo para etiquetas flotantes de Riesgo */
         .etiqueta-riesgo {
             background: rgba(0, 0, 0, 0.7);
@@ -100,6 +125,12 @@
 <div class="container">
     <div class="sidebar">
         <div class="sidebar-logo"><img src="crhmologo.png" alt="Logo"></div>
+        
+        <div class="search-container">
+            <input type="text" class="search-input" id="address-search" placeholder="🔍 Buscar dirección/colonia..." oninput="buscarDireccion()">
+            <div id="search-results" class="search-results"></div>
+        </div>
+
         <ul class="nav-menu">
             <li class="nav-item active"><span class="nav-icon">📊</span> Dashboard</li>
             <li class="nav-item" onclick="toggleUnidadesList()"><span class="nav-icon">🚑</span> Unidades ▾</li>
@@ -189,6 +220,7 @@
     var capaLluvia = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.5 });
     var hospitalLayer = L.layerGroup().addTo(map);
     var riesgoLayer = L.layerGroup();
+    var basesLayer = L.layerGroup().addTo(map); // Capa para las bases
 
     var hospitalesData = [[29.0814, -111.0037, "Hospital General de Especialidades"],[29.0864, -110.9621, "IMSS HGZ 15"],[29.1148, -110.9486, "Hospital Militar Regional"],[29.1159, -110.9725, "SSA Hospital Integral de la Mujer"],[29.1163, -110.9717, "SSA Hospital Infantil del Estado"],[29.0814, -110.9493, "Hospital Licona"],[29.0814, -110.9505, "Centro Médico del Noroeste"],[29.0896, -110.9521, "Hospital San diego de Alcalá"],[29.1040, -110.9533, "IMSS HGZ 02"],[29.0966, -110.9536, "ISSSTESON Dr. Ignacio Chavez"],[29.1101, -110.9507, "ISSSTE Dr. Fernando Ocaranza"],[29.1206, -110.9519, "Hospital San Diego"],[29.0987, -111.0015, "IMSS HGZ 14"], [29.0647, -110.9613, "Hospital CIMA"]];
 
@@ -196,8 +228,92 @@
         L.marker([h[0], h[1]], {icon: L.icon({iconUrl: "placeholder.png", iconSize: [30, 30]})}).bindPopup(h[2]).addTo(hospitalLayer); 
     });
 
-    var overlays = { "🏥 Hospitales": hospitalLayer, "🚗 Tráfico Real": googleTraffic, "🌧️ Radar Lluvia": capaLluvia, "⚠️ Zonas de Riesgo": riesgoLayer };
+    // --- DATOS Y MARCADORES DE BASES ---
+    const basesData = [
+        { nombre: "Base Sur", coords: [29.056410825968094, -110.95372333278944] },
+        { nombre: "Base Centro", coords: [29.0904, -110.9703] },
+        { nombre: "Base Norte", coords: [29.1418, -110.9853] }
+    ];
+
+    const baseIcon = L.icon({
+        iconUrl: 'bases.png',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30]
+    });
+
+    basesData.forEach(b => {
+        L.marker(b.coords, {icon: baseIcon})
+         .bindPopup(`<b>${b.nombre}</b><br>Cruz Roja Hermosillo`)
+         .addTo(basesLayer);
+    });
+
+    var overlays = { 
+        "🏥 Hospitales": hospitalLayer, 
+        "🚑 Bases CR": basesLayer,
+        "🚗 Tráfico Real": googleTraffic, 
+        "🌧️ Radar Lluvia": capaLluvia, 
+        "⚠️ Zonas de Riesgo": riesgoLayer 
+    };
     L.control.layers(null, overlays, { collapsed: false, position: 'topright' }).addTo(map);
+
+    // --- BUSCADOR CON CÁLCULO DE BASE CERCANA ---
+    async function buscarDireccion() {
+        const query = document.getElementById('address-search').value;
+        const resultsContainer = document.getElementById('search-results');
+        
+        if (query.length < 4) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${query}, Hermosillo, Sonora&limit=5`;
+        
+        try {
+            const resp = await fetch(url);
+            const data = await resp.json();
+            
+            resultsContainer.innerHTML = '';
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                div.innerText = item.display_name.split(',')[0] + (item.display_name.split(',')[1] || '');
+                
+                div.onclick = () => {
+                    const latIncidente = parseFloat(item.lat);
+                    const lonIncidente = parseFloat(item.lon);
+                    
+                    let baseCercana = "";
+                    let distanciaMinima = Infinity;
+
+                    basesData.forEach(base => {
+                        const d = map.distance([latIncidente, lonIncidente], base.coords);
+                        if (d < distanciaMinima) {
+                            distanciaMinima = d;
+                            baseCercana = base.nombre;
+                        }
+                    });
+
+                    const distKm = (distanciaMinima / 1000).toFixed(2);
+
+                    map.flyTo([latIncidente, lonIncidente], 16);
+                    L.popup().setLatLng([latIncidente, lonIncidente])
+                        .setContent(`
+                            <div style="text-align:center; font-family:'Inter', sans-serif;">
+                                <b style="color:var(--rojo-cr);">UBICACIÓN ENCONTRADA</b><br>
+                                <span style="font-size:11px;">${item.display_name.split(',')[0]}</span><hr style="margin:8px 0; border:0; border-top:1px solid #eee;">
+                                <b style="font-size:12px;">Base más cercana:</b><br>
+                                <span style="color:blue; font-weight:bold;">${baseCercana}</span> a ${distKm} km
+                            </div>
+                        `)
+                        .openOn(map);
+
+                    resultsContainer.innerHTML = '';
+                    document.getElementById('address-search').value = '';
+                };
+                resultsContainer.appendChild(div);
+            });
+        } catch (e) { console.error("Error en búsqueda", e); }
+    }
 
     // --- MODO OSCURO LOGICA ---
     let esModoOscuro = false;
