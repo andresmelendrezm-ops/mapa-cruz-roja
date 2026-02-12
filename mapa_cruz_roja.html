@@ -169,7 +169,7 @@
             <img src="crhmologo.png" alt="Logo">
         </div>
         <ul class="nav-menu">
-            <li class="nav-item active"><span class="nav-icon">📊</span> Dashboard PADSE</li>
+            <li class="nav-item active"><span class="nav-icon">📊</span> Dashboard</li>
             <li class="nav-item"><span class="nav-icon">🚑</span> Unidades</li>
             <li class="nav-item" onclick="toggleHospitalList()">
                 <span class="nav-icon">🏥</span> Hospitales ▾
@@ -186,6 +186,8 @@
             <div class="stat-card"><div class="label">UNIDADES ACTIVAS</div><div class="value">05</div></div>
             <div class="stat-card"><div class="label">TIEMPO RESPUESTA</div><div class="value">07:20</div></div>
             <div class="stat-card"><div class="label">PENDIENTES</div><div class="value" style="color: var(--rojo-cr);">02</div></div>
+            <div class="stat-card"><div class="label">CLIMA HERMOSILLO</div><div id="clima-info" class="value">--°C</div><div id="clima-desc" style="font-size: 10px; color: #777; text-transform: uppercase;">Cargando...</div>
+</div>
         </div>
 
         <div id="hospital-info-card" class="info-card">
@@ -299,6 +301,38 @@
         } else {
             listaDiv.style.display = 'none';
         }
+        // ================= CONFIGURACIÓN DE CLIMA =================
+const API_KEY = "b99d75364d37e9fd2bedb86b7e42743e"; // Tu API Key de OpenWeather
+
+async function obtenerClima() {
+    try {
+        // Obtenemos datos de Hermosillo (Lat: 29.09, Lng: -110.96)
+        const resp = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=29.09&lon=-110.96&units=metric&lang=es&appid=${API_KEY}`);
+        const datos = await resp.json();
+        
+        // Actualizamos los textos en la tarjeta
+        document.getElementById('clima-info').innerText = Math.round(datos.main.temp) + "°C";
+        document.getElementById('clima-desc').innerText = datos.weather[0].description;
+    } catch (e) {
+        console.error("Error al obtener el clima:", e);
+    }
+}
+
+// Agregamos la capa visual de lluvia al control de capas
+var capaLluvia = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, {
+    opacity: 0.5
+});
+
+// Añadimos la opción al menú de capas existente
+overlays["<span style='font-size:12px'>🌧️ Ver Lluvia (Radar)</span>"] = capaLluvia;
+
+// Actualizamos el control de capas para que aparezca la nueva opción
+L.control.layers(null, overlays, { collapsed: false, position: 'topright' }).addTo(map);
+
+// Llamamos a la función al cargar
+obtenerClima();
+// Actualizar cada 10 minutos
+setInterval(obtenerClima, 600000);
     }
 </script>
 
