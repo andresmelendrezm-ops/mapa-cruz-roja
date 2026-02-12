@@ -7,24 +7,38 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --rojo-cr: #FF0000; --sidebar-bg: #DEDEDE; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background-color: #F0F2F5; overflow: hidden; }
+        :root { 
+            --rojo-cr: #FF0000; 
+            --sidebar-bg: #DEDEDE; 
+            --bg-main: #F0F2F5;
+            --text-color: #333;
+            --card-bg: white;
+        }
+
+        /* Variables exclusivas para Modo Oscuro */
+        body.dark-theme {
+            --bg-main: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #2d2d2d;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background-color: var(--bg-main); overflow: hidden; transition: background 0.3s; }
         .container { display: flex; height: 100vh; }
         
-        /* Sidebar */
-        .sidebar { width: 240px; background-color: var(--sidebar-bg); display: flex; flex-direction: column; padding: 20px 0; flex-shrink: 0; }
+        /* Sidebar - SE MANTIENE ORIGINAL */
+        .sidebar { width: 240px; background-color: #DEDEDE !important; display: flex; flex-direction: column; padding: 20px 0; flex-shrink: 0; z-index: 10; }
         .sidebar-logo { padding: 0 20px 20px 20px; text-align: center; }
         .sidebar-logo img { width: 160px; margin-bottom: 10px; }
         .nav-menu { list-style: none; padding: 0; margin: 0; }
-        .nav-item { padding: 15px 25px; display: flex; align-items: center; font-size: 14px; color: #555; cursor: pointer; transition: 0.3s; }
-        .nav-item.active { background-color: #1a1a1a; color: white; border-left: 4px solid var(--rojo-cr); }
+        .nav-item { padding: 15px 25px; display: flex; align-items: center; font-size: 14px; color: #555 !important; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { background-color: #1a1a1a; color: white !important; border-left: 4px solid var(--rojo-cr); }
 
         /* Estilo para etiquetas flotantes de Riesgo */
         .etiqueta-riesgo {
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid #FF0000;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--rojo-cr);
             font-weight: bold;
-            color: #333;
+            color: white;
             padding: 2px 5px;
             border-radius: 4px;
             font-size: 10px;
@@ -40,26 +54,44 @@
 
         /* Main Content */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; position: relative; gap: 15px; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 12px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--text-color); transition: 0.3s; }
 
         .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; z-index: 5; }
-        .stat-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .stat-card { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--text-color); transition: 0.3s; }
 
         .map-container { flex-grow: 1; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; }
         #map { width: 100%; height: 100%; }
         
+        /* Botón Dark Mode Flotante */
+        .dark-mode-toggle {
+            position: absolute;
+            top: 80px;
+            right: 30px;
+            z-index: 1000;
+            background: var(--rojo-cr);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-size: 12px;
+        }
+
         .info-card { 
             position: absolute; 
             bottom: 20px; 
             right: 20px; 
             width: 260px; 
-            background: white; 
+            background: var(--card-bg); 
             padding: 20px; 
             border-radius: 15px; 
             box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
             z-index: 1100; 
             display: none; 
             border-left: 6px solid var(--rojo-cr); 
+            color: var(--text-color);
         }
     </style>
 </head>
@@ -87,46 +119,47 @@
 
     <div class="main-content">
         <div class="top-bar">
-            <div style="font-weight: 700; color: #444;">SISTEMA PADSE | CRUZ ROJA MEXICANA</div>
+            <div style="font-weight: 700;">SISTEMA PADSE | CRUZ ROJA MEXICANA</div>
             <div style="text-align: right;">
-                <span id="date-now" style="font-size: 11px; color:#777;"></span>
+                <span id="date-now" style="font-size: 11px; opacity: 0.7;"></span>
                 <b id="clock-now" style="display:block; color:var(--rojo-cr); font-size:20px;">00:00:00</b>
             </div>
         </div>
 
         <div class="dashboard-grid">
             <div class="stat-card">
-                <div style="font-size: 11px; color:#777; font-weight:600;">ALERTAS METEOROLÓGICAS</div>
+                <div style="font-size: 11px; opacity: 0.7; font-weight:600;">ALERTAS METEOROLÓGICAS</div>
                 <div id="alerta-status" style="font-size: 18px; font-weight:700; color: #2ecc71;">CARGANDO...</div>
-                <div id="alerta-desc" style="font-size: 10px; color:#999; margin-top:5px;">Sincronizando...</div>
+                <div id="alerta-desc" style="font-size: 10px; opacity: 0.6; margin-top:5px;">Sincronizando...</div>
             </div>
             <div class="stat-card">
-                <div style="font-size: 11px; color:#777; font-weight:600;">CLIMA HERMOSILLO</div>
+                <div style="font-size: 11px; opacity: 0.7; font-weight:600;">CLIMA HERMOSILLO</div>
                 <div id="clima-info" style="font-size: 22px; font-weight:700;">--°C</div>
-                <div id="clima-desc" style="font-size: 10px; color:#999; margin-top:5px;">Cargando...</div>
+                <div id="clima-desc" style="font-size: 10px; opacity: 0.6; margin-top:5px;">Cargando...</div>
             </div>
             <div class="stat-card">
-                <div style="font-size: 11px; color:#777; font-weight:600;">PRÓXIMO RELEVO</div>
+                <div style="font-size: 11px; opacity: 0.7; font-weight:600;">PRÓXIMO RELEVO</div>
                 <div id="relevo-timer" style="font-size: 22px; font-weight:700;">--:--:--</div>
-                <div style="font-size: 10px; color:#999; margin-top:5px;">PARA SIGUIENTE RELEVO</div>
+                <div style="font-size: 10px; opacity: 0.6; margin-top:5px;">PARA SIGUIENTE RELEVO</div>
             </div>
         </div>
 
         <div id="hospital-info-card" class="info-card">
-            <button onclick="document.getElementById('hospital-info-card').style.display='none'" style="float:right; border:none; background:none; cursor:pointer;">✕</button>
+            <button onclick="document.getElementById('hospital-info-card').style.display='none'" style="float:right; border:none; background:none; cursor:pointer; color:inherit;">✕</button>
             <h3 id="h-nombre" style="margin-top:0; font-size:14px;">Hospital</h3>
             <p style="font-size:11px;"><b>Capacidad:</b> <span id="h-capacidad" class="status-pill"></span></p>
-            <p style="font-size:11px;"><b>Tel:</b> <a id="h-tel" href="#"></a></p>
+            <p style="font-size:11px;"><b>Tel:</b> <a id="h-tel" href="#" style="color:var(--rojo-cr);"></a></p>
         </div>
 
         <div id="unit-info-card" class="info-card" style="border-left-color: #1a1a1a;">
-            <button onclick="document.getElementById('unit-info-card').style.display='none'" style="float:right; border:none; background:none; cursor:pointer;">✕</button>
+            <button onclick="document.getElementById('unit-info-card').style.display='none'" style="float:right; border:none; background:none; cursor:pointer; color:inherit;">✕</button>
             <h3 id="u-nombre" style="margin-top:0; font-size:14px; color:var(--rojo-cr);">Unidad</h3>
             <p style="font-size:11px;"><b>Operador:</b> <br><span id="u-operador">---</span></p>
             <p style="font-size:11px;"><b>Jefe de Servicio:</b> <br><span id="u-jefe">---</span></p>
             <p style="font-size:11px;"><b>Auxiliar(es):</b> <br><span id="u-auxiliar">---</span></p>
         </div>
 
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()" id="btn-dark">🌙 Modo Oscuro</button>
         <div class="map-container"><div id="map"></div></div>
     </div>
 </div>
@@ -138,14 +171,24 @@
     const UNIDADES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4_Q6g0WAkAHw8t7ZONnY_xppTfxr0Gh736C9IwPgDIM4P2-zDsiPau4HGtACULSg13LlAPuZgbiR8/pub?output=csv';
     const ZONAS_RIESGO_URL = 'https://raw.githubusercontent.com/andresmelendrezm-ops/mapa-cruz-roja/refs/heads/main/zonas_riesgo.geojson';
 
+    // --- CAPAS DE MAPA ---
+    const layerClaro = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+    const layerOscuro = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+    });
+
     // --- MAPA ---
-    var map = L.map('map', { center: [29.09, -110.96], zoom: 13, zoomControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    var map = L.map('map', { 
+        center: [29.09, -110.96], 
+        zoom: 13, 
+        zoomControl: false,
+        layers: [layerClaro]
+    });
 
     var googleTraffic = L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
     var capaLluvia = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.5 });
     var hospitalLayer = L.layerGroup().addTo(map);
-    var riesgoLayer = L.layerGroup(); // Capa nueva para zonas de riesgo
+    var riesgoLayer = L.layerGroup();
 
     var hospitalesData = [[29.0814, -111.0037, "Hospital General de Especialidades"],[29.0864, -110.9621, "IMSS HGZ 15"],[29.1148, -110.9486, "Hospital Militar Regional"],[29.1159, -110.9725, "SSA Hospital Integral de la Mujer"],[29.1163, -110.9717, "SSA Hospital Infantil del Estado"],[29.0814, -110.9493, "Hospital Licona"],[29.0814, -110.9505, "Centro Médico del Noroeste"],[29.0896, -110.9521, "Hospital San diego de Alcalá"],[29.1040, -110.9533, "IMSS HGZ 02"],[29.0966, -110.9536, "ISSSTESON Dr. Ignacio Chavez"],[29.1101, -110.9507, "ISSSTE Dr. Fernando Ocaranza"],[29.1206, -110.9519, "Hospital San Diego"],[29.0987, -111.0015, "IMSS HGZ 14"], [29.0647, -110.9613, "Hospital CIMA"]];
 
@@ -155,6 +198,29 @@
 
     var overlays = { "🏥 Hospitales": hospitalLayer, "🚗 Tráfico Real": googleTraffic, "🌧️ Radar Lluvia": capaLluvia, "⚠️ Zonas de Riesgo": riesgoLayer };
     L.control.layers(null, overlays, { collapsed: false, position: 'topright' }).addTo(map);
+
+    // --- MODO OSCURO LOGICA ---
+    let esModoOscuro = false;
+    function toggleDarkMode() {
+        const btn = document.getElementById('btn-dark');
+        if (!esModoOscuro) {
+            map.removeLayer(layerClaro);
+            map.addLayer(layerOscuro);
+            document.body.classList.add('dark-theme');
+            btn.innerHTML = "☀️ Modo Claro";
+            btn.style.background = "#DEDEDE";
+            btn.style.color = "#333";
+            esModoOscuro = true;
+        } else {
+            map.removeLayer(layerOscuro);
+            map.addLayer(layerClaro);
+            document.body.classList.remove('dark-theme');
+            btn.innerHTML = "🌙 Modo Oscuro";
+            btn.style.background = "var(--rojo-cr)";
+            btn.style.color = "white";
+            esModoOscuro = false;
+        }
+    }
 
     // --- FUNCIÓN PARA CARGAR ZONAS DE RIESGO (GEOJSON) ---
     async function cargarZonasRiesgo() {
@@ -179,7 +245,6 @@
                     };
                 },
                 onEachFeature: function (feature, layer) {
-                    // Nombre flotante siempre visible
                     if (feature.properties.name || feature.properties.nombre) {
                         layer.bindTooltip(feature.properties.name || feature.properties.nombre, {
                             permanent: true,
@@ -187,7 +252,6 @@
                             className: 'etiqueta-riesgo'
                         });
                     }
-                    // Detalle al hacer clic
                     layer.bindPopup(`<b>${feature.properties.name || feature.properties.nombre}</b><br>Nivel de Riesgo: ${feature.properties.nivel_riesgo || 'No definido'}`);
                 }
             });
