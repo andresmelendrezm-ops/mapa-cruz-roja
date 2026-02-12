@@ -19,6 +19,17 @@
         .nav-item { padding: 15px 25px; display: flex; align-items: center; font-size: 14px; color: #555; cursor: pointer; transition: 0.3s; }
         .nav-item.active { background-color: #1a1a1a; color: white; border-left: 4px solid var(--rojo-cr); }
 
+        /* Estilo para etiquetas flotantes de Riesgo */
+        .etiqueta-riesgo {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #FF0000;
+            font-weight: bold;
+            color: #333;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
         /* Unidades */
         .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
         .dot-turno { background: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
@@ -37,20 +48,19 @@
         .map-container { flex-grow: 1; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; }
         #map { width: 100%; height: 100%; }
         
-        /* Info Cards (Hospitales y Unidades) */
-.info-card { 
-    position: absolute; 
-    bottom: 20px; /* Anclado a la parte inferior */
-    right: 20px; /* Esquina derecha */
-    width: 260px; 
-    background: white; 
-    padding: 20px; 
-    border-radius: 15px; 
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
-    z-index: 1100; 
-    display: none; 
-    border-left: 6px solid var(--rojo-cr); 
-}
+        .info-card { 
+            position: absolute; 
+            bottom: 20px; 
+            right: 20px; 
+            width: 260px; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
+            z-index: 1100; 
+            display: none; 
+            border-left: 6px solid var(--rojo-cr); 
+        }
     </style>
 </head>
 <body>
@@ -71,7 +81,7 @@
             </div>
             <li class="nav-item" onclick="toggleHospitalList()"><span class="nav-icon">🏥</span> Hospitales ▾</li>
             <div id="lista-hospitales-desplegable" style="display:none; background: #cecece; padding-left: 5px; max-height: 300px; overflow-y: auto;"></div>
-            <li class="nav-item"><span class="nav-icon">📋</span> Reportes</li>
+            <li class="nav-item" onclick="cargarZonasRiesgo()"><span class="nav-icon">⚠️</span> Zonas de Riesgo</li>
         </ul>
     </div>
 
@@ -126,6 +136,7 @@
     const API_KEY = "b99d75364d37e9fd2bedb86b7e42743e";
     const SHEET_HOSPITALES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTh7H5-srU1-anbqTEuHtC5BYciljJuqQP36afOD7OouN9jqeBHvHiMfRdGmHCdRG_MX2bGPoOjws07/pub?output=csv';
     const UNIDADES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4_Q6g0WAkAHw8t7ZONnY_xppTfxr0Gh736C9IwPgDIM4P2-zDsiPau4HGtACULSg13LlAPuZgbiR8/pub?output=csv';
+    const ZONAS_RIESGO_URL = 'https://raw.githubusercontent.com/andresmelendrezm-ops/mapa-cruz-roja/refs/heads/main/zonas_riesgo.geojson';
 
     // --- MAPA ---
     var map = L.map('map', { center: [29.09, -110.96], zoom: 13, zoomControl: false });
@@ -134,6 +145,7 @@
     var googleTraffic = L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
     var capaLluvia = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.5 });
     var hospitalLayer = L.layerGroup().addTo(map);
+    var riesgoLayer = L.layerGroup(); // Capa nueva para zonas de riesgo
 
     var hospitalesData = [[29.0814, -111.0037, "Hospital General de Especialidades"],[29.0864, -110.9621, "IMSS HGZ 15"],[29.1148, -110.9486, "Hospital Militar Regional"],[29.1159, -110.9725, "SSA Hospital Integral de la Mujer"],[29.1163, -110.9717, "SSA Hospital Infantil del Estado"],[29.0814, -110.9493, "Hospital Licona"],[29.0814, -110.9505, "Centro Médico del Noroeste"],[29.0896, -110.9521, "Hospital San diego de Alcalá"],[29.1040, -110.9533, "IMSS HGZ 02"],[29.0966, -110.9536, "ISSSTESON Dr. Ignacio Chavez"],[29.1101, -110.9507, "ISSSTE Dr. Fernando Ocaranza"],[29.1206, -110.9519, "Hospital San Diego"],[29.0987, -111.0015, "IMSS HGZ 14"], [29.0647, -110.9613, "Hospital CIMA"]];
 
@@ -141,8 +153,54 @@
         L.marker([h[0], h[1]], {icon: L.icon({iconUrl: "placeholder.png", iconSize: [30, 30]})}).bindPopup(h[2]).addTo(hospitalLayer); 
     });
 
-    var overlays = { "🏥 Hospitales": hospitalLayer, "🚗 Tráfico Real": googleTraffic, "🌧️ Radar Lluvia": capaLluvia };
+    var overlays = { "🏥 Hospitales": hospitalLayer, "🚗 Tráfico Real": googleTraffic, "🌧️ Radar Lluvia": capaLluvia, "⚠️ Zonas de Riesgo": riesgoLayer };
     L.control.layers(null, overlays, { collapsed: false, position: 'topright' }).addTo(map);
+
+    // --- FUNCIÓN PARA CARGAR ZONAS DE RIESGO (GEOJSON) ---
+    async function cargarZonasRiesgo() {
+        if (map.hasLayer(riesgoLayer) && riesgoLayer.getLayers().length > 0) {
+            map.removeLayer(riesgoLayer);
+            riesgoLayer.clearLayers();
+            return;
+        }
+
+        try {
+            const resp = await fetch(ZONAS_RIESGO_URL);
+            const data = await resp.json();
+            
+            const geojsonLayer = L.geoJSON(data, {
+                style: function(feature) {
+                    return {
+                        fillColor: feature.properties.fill || feature.properties.color || '#FF0000',
+                        weight: 2,
+                        opacity: 1,
+                        color: feature.properties.stroke || 'white',
+                        fillOpacity: feature.properties['fill-opacity'] || 0.5
+                    };
+                },
+                onEachFeature: function (feature, layer) {
+                    // Nombre flotante siempre visible
+                    if (feature.properties.name || feature.properties.nombre) {
+                        layer.bindTooltip(feature.properties.name || feature.properties.nombre, {
+                            permanent: true,
+                            direction: 'center',
+                            className: 'etiqueta-riesgo'
+                        });
+                    }
+                    // Detalle al hacer clic
+                    layer.bindPopup(`<b>${feature.properties.name || feature.properties.nombre}</b><br>Nivel de Riesgo: ${feature.properties.nivel_riesgo || 'No definido'}`);
+                }
+            });
+            
+            riesgoLayer.addLayer(geojsonLayer);
+            riesgoLayer.addTo(map);
+            map.fitBounds(geojsonLayer.getBounds());
+            
+        } catch (e) {
+            console.error("Error cargando GeoJSON", e);
+            alert("No se pudieron cargar las zonas de riesgo.");
+        }
+    }
 
     // --- HOSPITALES ---
     async function toggleHospitalList() {
@@ -215,7 +273,6 @@
             let dot = u.estado === "En turno" ? "dot-turno" : u.estado === "Servicio Especial" ? "dot-especial" : "dot-fuera";
             item.innerHTML = `<span class="status-dot ${dot}"></span> <b>${u.nombre}</b> <span style="margin-left:auto; font-size:9px; color:#666">${u.estado}</span>`;
             
-            // Evento para mostrar tripulación
             item.onclick = () => {
                 document.getElementById('u-nombre').innerText = u.nombre;
                 document.getElementById('u-operador').innerText = u.operador;
@@ -277,7 +334,7 @@
     actualizarDashboard();
     obtenerClima();
     setInterval(actualizarDashboard, 1000);
-    setInterval(obtenerClima, 600000); 
+    setInterval(obtenerClima, 400000); 
 </script>
 </body>
 </html>
