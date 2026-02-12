@@ -197,6 +197,8 @@
             marquee.innerText = alertas.length > 0 ? alertas.join(" | ") + " | " + alertas[0] : "✅ VÍAS SIN REPORTES CRÍTICOS | OPERACIÓN NORMAL";
         } catch(e) { marquee.innerText = "⚠️ MONITOREO VIAL ACTIVO | ANALIZANDO FLUJO VIAL"; }
     }
+    procesarReportesViales(); // primera ejecución inmediata
+    setInterval(procesarReportesViales, 60000); // cada 60,000 ms = 1 minuto
 
     async function cargarZonasRiesgo() {
         if(riesgoLayer.getLayers().length > 0) { riesgoLayer.clearLayers(); map.removeLayer(riesgoLayer); return; }
