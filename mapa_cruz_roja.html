@@ -127,6 +127,26 @@
     var hospitalesData = [[29.0814, -111.0037, "Hospital General de Especialidades"],[29.0864, -110.9621, "IMSS HGZ 15"],[29.1148, -110.9486, "Hospital Militar Regional"],[29.1159, -110.9725, "SSA Hospital Integral de la Mujer"],[29.1163, -110.9717, "SSA Hospital Infantil del Estado"],[29.0814, -110.9493, "Hospital Licona"],[29.0814, -110.9505, "Centro Médico del Noroeste"],[29.0896, -110.9521, "Hospital San Diego de Alcalá"],[29.1040, -110.9533, "IMSS HGZ 02"],[29.0966, -110.9536, "ISSSTESON Dr. Ignacio Chavez"],[29.1101, -110.9507, "ISSSTE Dr. Fernando Ocaranza"],[29.0987, -111.0015, "IMSS HGZ 14"], [29.0647, -110.9613, "Hospital CIMA"]];
     hospitalesData.forEach(h => { L.marker([h[0], h[1]], {icon: L.icon({iconUrl: "placeholder.png", iconSize: [30, 30]})}).bindPopup(h[2]).addTo(hospitalLayer); });
 
+    // --- RESTAURACIÓN DE CAPAS Y CONTROLES ---
+var googleTraffic = L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', {
+    maxZoom: 20, 
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+});
+
+var capaLluvia = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { 
+    opacity: 0.5 
+});
+
+// Objeto de capas para el selector
+var overlays = {
+    "<span style='font-size:12px'>🏥 Hospitales</span>": hospitalLayer,
+    "<span style='font-size:12px'>🚗 Tráfico Real (Google)</span>": googleTraffic,
+    "<span style='font-size:12px'>🌧️ Radar Lluvia</span>": capaLluvia
+};
+
+// Añadir el control de capas al mapa
+L.control.layers(null, overlays, { collapsed: false, position: 'topright' }).addTo(map);
+
     // --- LÓGICA DE UNIDADES ---
     async function toggleUnidadesList() {
         const listaDiv = document.getElementById('lista-unidades-desplegable');
