@@ -182,23 +182,47 @@
         "🌧️ Precipitación": capaLluvia
     }, { collapsed: false, position: 'topright' }).addTo(map);
 
+    // --- FUNCIÓN DE REPORTES VIALES ACTUALIZADA (SOPORTA MINÚSCULAS/ACENTOS) ---
     async function procesarReportesViales() {
         const marquee = document.getElementById('marquee-content');
-        const palabrasClave = ["Choque", "choque", "CHOQUE", "Incendio", "incendio", "INCENDIO", "Accidente", "accidente", "ACCIDENTE", "Cierre", "cierre", "CIERRE", "cerrado", "CERRADO", "Cerrado", "Obras", "obras", "OBRAS", "Reparación", "reparación", "Vías alternas", "vías alternas", "Vías Alternas", "Restricción", "Precaución", "precaución", "PRECAUCIÓN", "Manifestación", "Cuerpos de emergencia", "Evite la zona"];
+        
+        // Palabras clave normalizadas para comparación (sin acentos, minúsculas)
+        const palabrasClave = ["choque", "incendio", "accidente", "cierre", "cerrado", "obras", "reparacion", "vias alternas", "restriccion", "precaucion", "manifestacion", "emergencia", "evite la zona"];
+        
         const PROXY = "https://api.allorigins.win/get?url=";
         const FEED_URL = "https://nitter.net/Policia_HMO/rss"; 
+
         try {
             const resp = await fetch(PROXY + encodeURIComponent(FEED_URL));
             const json = await resp.json();
             const xml = new DOMParser().parseFromString(json.contents, "text/xml");
             const items = xml.querySelectorAll("item");
             let alertas = [];
-            items.forEach((item, i) => { if(i < 8) { let txt = item.querySelector("title").textContent.toUpperCase(); if(palabrasClave.some(p => txt.includes(p))) alertas.push("🚨 " + txt.replace(/(HTTPS?|FTP):\/\/[\S]+/g, '')); } });
+
+            items.forEach((item, i) => {
+                if(i < 10) { 
+                    let originalTxt = item.querySelector("title").textContent;
+                    
+                    // Normalización de texto invisible para la búsqueda
+                    let txtNorm = originalTxt.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "");
+
+                    // Verificación inteligente
+                    const coincidencia = palabrasClave.some(p => txtNorm.includes(p));
+
+                    if(coincidencia) {
+                        let limpio = originalTxt.replace(/(HTTPS?|FTP):\/\/[\S]+/gi, '').toUpperCase();
+                        alertas.push("🚨 " + limpio);
+                    }
+                }
+            });
+
             marquee.innerText = alertas.length > 0 ? alertas.join(" | ") + " | " + alertas[0] : "✅ VÍAS SIN REPORTES CRÍTICOS | OPERACIÓN NORMAL";
-        } catch(e) { marquee.innerText = "⚠️ MONITOREO VIAL ACTIVO | ANALIZANDO FLUJO VIAL"; }
+        } catch(e) { 
+            marquee.innerText = "⚠️ MONITOREO VIAL ACTIVO | ANALIZANDO FLUJO VIAL"; 
+        }
     }
-    procesarReportesViales(); // primera ejecución inmediata
-    setInterval(procesarReportesViales, 60000); // cada 60,000 ms = 1 minuto
 
     async function cargarZonasRiesgo() {
         if(riesgoLayer.getLayers().length > 0) { riesgoLayer.clearLayers(); map.removeLayer(riesgoLayer); return; }
@@ -334,7 +358,9 @@
     }
 
     actualizarDashboard(); obtenerClima(); procesarReportesViales();
-    setInterval(actualizarDashboard, 1000); setInterval(obtenerClima, 600000); setInterval(procesarReportesViales, 180000);
+    setInterval(actualizarDashboard, 1000); 
+    setInterval(obtenerClima, 600000); 
+    setInterval(procesarReportesViales, 60000); // Actualizado a 1 minuto (60,000 ms)
 </script>
 </body>
 </html>
