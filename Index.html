@@ -152,7 +152,7 @@
     const layerOscuro = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
     const googleTraffic = L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
     
-    // Capas Meteorológicas (Nuevas)
+    // Capas Meteorológicas
     const capaNubes = L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.7 });
     const capaLluvia = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.7 });
 
@@ -172,7 +172,7 @@
     const baseIcon = L.icon({ iconUrl: 'bases.png', iconSize: [30, 30], iconAnchor: [15, 30] });
     basesData.forEach(b => L.marker(b.coords, {icon: baseIcon}).bindPopup(`<b>${b.nombre}</b>`).addTo(basesLayer));
 
-    // --- CONTROL DE CAPAS (Actualizado con Clima) ---
+    // --- CONTROL DE CAPAS ---
     L.control.layers(null, { 
         "🏥 Hospitales": hospitalLayer, 
         "🚑 Bases CR": basesLayer, 
@@ -182,50 +182,72 @@
         "🌧️ Precipitación": capaLluvia
     }, { collapsed: false, position: 'topright' }).addTo(map);
 
-    // --- FUNCIÓN DE REPORTES VIALES ACTUALIZADA (SOPORTA MINÚSCULAS/ACENTOS) ---
+    // --- CORRECCIÓN: Activar carga de datos cuando se selecciona en el menú del mapa ---
+    map.on('overlayadd', function(event) {
+        if (event.name === "⚠️ Riesgo") {
+            // Solo cargamos si la capa está vacía
+            if (riesgoLayer.getLayers().length === 0) {
+                descargarGeoJSONRiesgo();
+            }
+        }
+    });
+
+    // --- FUNCIÓN DE REPORTES VIALES MULTI-FUENTE ---
     async function procesarReportesViales() {
         const marquee = document.getElementById('marquee-content');
         
-        // Palabras clave normalizadas para comparación (sin acentos, minúsculas)
-        const palabrasClave = ["choque", "semaforo", "volcadura", "inundacion", "emergencia", "incendio", "accidente", "cierre", "cerrado", "obras", "reparacion", "vias alternas", "restriccion", "precaucion", "manifestacion", "emergencia", "evite la zona"];
+        // Mantenemos tus palabras clave y agregamos las de Agua/SIDUR
+        const palabrasClave = ["choque", "semaforo", "volcadura", "inundacion", "emergencia", "incendio", "accidente", "cierre", "cerrado", "obras", "reparacion", "vias alternas", "restriccion", "precaucion", "manifestacion", "emergencia", "evite la zona", "fuga", "socavon", "tuberia", "pavimentacion", "desviacion"];
         
+        // Cuentas a monitorear
+        const fuentes = [
+            { id: "Policia_HMO", tag: "SEGURIDAD" },
+            { id: "AguaHermosillo", tag: "AGUA" },
+            { id: "Sidur_Sonora", tag: "SIDUR" }
+        ];
+
         const PROXY = "https://api.allorigins.win/get?url=";
-        const FEED_URL = "https://nitter.net/Policia_HMO/rss"; 
+        let alertasGlobales = [];
 
         try {
-            const resp = await fetch(PROXY + encodeURIComponent(FEED_URL));
-            const json = await resp.json();
-            const xml = new DOMParser().parseFromString(json.contents, "text/xml");
-            const items = xml.querySelectorAll("item");
-            let alertas = [];
+            // Consultamos todas las fuentes en paralelo
+            const promesas = fuentes.map(f => {
+                const url = `https://nitter.net/${f.id}/rss`;
+                return fetch(PROXY + encodeURIComponent(url)).then(r => r.json());
+            });
 
-            items.forEach((item, i) => {
-                if(i < 10) { 
-                    let originalTxt = item.querySelector("title").textContent;
-                    
-                    // Normalización de texto invisible para la búsqueda
-                    let txtNorm = originalTxt.toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "");
+            const resultados = await Promise.all(promesas);
 
-                    // Verificación inteligente
-                    const coincidencia = palabrasClave.some(p => txtNorm.includes(p));
+            resultados.forEach((json, index) => {
+                if (json.contents) {
+                    const xml = new DOMParser().parseFromString(json.contents, "text/xml");
+                    const items = xml.querySelectorAll("item");
+                    const tag = fuentes[index].tag;
 
-                    if(coincidencia) {
-                        let limpio = originalTxt.replace(/(HTTPS?|FTP):\/\/[\S]+/gi, '').toUpperCase();
-                        alertas.push("🚨 " + limpio);
-                    }
+                    items.forEach((item, i) => {
+                        if(i < 5) { // Revisamos los 5 últimos posts por cuenta
+                            let originalTxt = item.querySelector("title").textContent;
+                            let txtNorm = originalTxt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+                            if(palabrasClave.some(p => txtNorm.includes(p))) {
+                                let limpio = originalTxt.replace(/(HTTPS?|FTP):\/\/[\S]+/gi, '').toUpperCase();
+                                alertasGlobales.push(`[${tag}] 🚨 ${limpio}`);
+                            }
+                        }
+                    });
                 }
             });
 
-            marquee.innerText = alertas.length > 0 ? alertas.join(" | ") + " | " + alertas[0] : "✅ VÍAS SIN REPORTES CRÍTICOS | OPERACIÓN NORMAL";
+            marquee.innerText = alertasGlobales.length > 0 
+                ? alertasGlobales.join(" | ") + " | " + alertasGlobales[0] 
+                : "✅ MONITOREO VIAL INTEGRAL | OPERACIÓN NORMAL";
         } catch(e) { 
-            marquee.innerText = "⚠️ MONITOREO VIAL ACTIVO | ANALIZANDO FLUJO VIAL"; 
+            marquee.innerText = "⚠️ RECONECTANDO CON SERVIDORES DE INFORMACIÓN..."; 
         }
     }
 
-    async function cargarZonasRiesgo() {
-        if(riesgoLayer.getLayers().length > 0) { riesgoLayer.clearLayers(); map.removeLayer(riesgoLayer); return; }
+    // Separamos la lógica de descarga para reusarla
+    async function descargarGeoJSONRiesgo() {
         try {
             const resp = await fetch(ZONAS_RIESGO_URL);
             const data = await resp.json();
@@ -236,8 +258,20 @@
                     l.bindPopup(`<b>${f.properties.name || f.properties.nombre}</b><br>Nivel de Riesgo: ${f.properties.nivel_riesgo || 'No definido'}`);
                 }
             });
-            riesgoLayer.addLayer(geojsonLayer); riesgoLayer.addTo(map); map.fitBounds(geojsonLayer.getBounds());
-        } catch (e) { console.error(e); }
+            riesgoLayer.addLayer(geojsonLayer);
+            riesgoLayer.addTo(map);
+            map.fitBounds(geojsonLayer.getBounds());
+        } catch (e) { console.error("Error cargando GeoJSON:", e); }
+    }
+
+    async function cargarZonasRiesgo() {
+        // Lógica para el botón lateral
+        if(riesgoLayer.getLayers().length > 0) { 
+            riesgoLayer.clearLayers(); 
+            map.removeLayer(riesgoLayer); 
+        } else {
+            descargarGeoJSONRiesgo();
+        }
     }
 
     async function buscarDireccion() {
@@ -360,7 +394,7 @@
     actualizarDashboard(); obtenerClima(); procesarReportesViales();
     setInterval(actualizarDashboard, 1000); 
     setInterval(obtenerClima, 600000); 
-    setInterval(procesarReportesViales, 60000); // Actualizado a 1 minuto (60,000 ms)
+    setInterval(procesarReportesViales, 60000); 
 </script>
 </body>
 </html>
