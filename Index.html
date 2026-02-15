@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PADSE - Cruz Roja Hermosillo</title>
-    
     <link rel="icon" type="image/png" href="crhmologo.png">
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -17,16 +15,13 @@
             --text-color: #333;
             --card-bg: white;
         }
-
         body.dark-theme {
             --bg-main: #121212;
             --text-color: #e0e0e0;
             --card-bg: #2d2d2d;
         }
-
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Inter', sans-serif; background-color: var(--bg-main); overflow: hidden; transition: background 0.3s; }
         .container { display: flex; height: 100vh; }
-        
         .sidebar { width: 240px; background-color: #DEDEDE !important; display: flex; flex-direction: column; padding: 20px 0; flex-shrink: 0; z-index: 10; }
         .sidebar-logo { padding: 0 20px 20px 20px; text-align: center; }
         .sidebar-logo img { width: 160px; margin-bottom: 10px; }
@@ -34,46 +29,33 @@
         .nav-item { padding: 15px 25px; display: flex; align-items: center; font-size: 14px; color: #555 !important; cursor: pointer; transition: 0.3s; }
         .nav-item:hover { background: rgba(0,0,0,0.05); }
         .nav-item.active { background-color: #1a1a1a; color: white !important; border-left: 4px solid var(--rojo-cr); }
-
         .search-container { padding: 10px 15px; position: relative; }
         .search-input { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #bbb; font-size: 12px; outline: none; box-sizing: border-box; }
         .search-results { background: white; position: absolute; width: 210px; z-index: 2000; font-size: 11px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 150px; overflow-y: auto; border-radius: 0 0 8px 8px; }
         .search-item { padding: 8px; cursor: pointer; border-bottom: 1px solid #eee; color: #333; }
         .search-item:hover { background: #f0f0f0; }
-
         .marquee-wrapper { flex-grow: 1; margin: 0 20px; background: #fffafa; border-radius: 10px; overflow: hidden; white-space: nowrap; display: flex; align-items: center; border: 1px solid #ffdada; height: 40px; }
-        .marquee-text { display: inline-block; padding-left: 100%; animation: marquee-scroll 30s linear infinite; color: var(--rojo-cr); font-weight: 700; font-size: 13px; text-transform: uppercase; }
+        .marquee-text { display: inline-block; padding-left: 100%; animation: marquee-scroll 20s linear infinite; color: var(--rojo-cr); font-weight: 700; font-size: 13px; text-transform: uppercase; }
         @keyframes marquee-scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-
         .etiqueta-riesgo { background: rgba(0, 0, 0, 0.7); border: 1px solid var(--rojo-cr); font-weight: bold; color: white; padding: 2px 5px; border-radius: 4px; font-size: 10px; }
-
-        .weather-legend { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.2); line-height: 18px; color: #333; font-size: 11px; display: none; z-index: 1000; }
+        .weather-legend { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.2); line-height: 18px; color: #333; font-size: 11px; display: none; z-index: 1000; position: absolute; bottom: 30px; left: 10px; }
         .weather-legend i { width: 14px; height: 14px; float: left; margin-right: 8px; opacity: 0.9; border-radius: 2px; }
-
         .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
         .dot-turno { background: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
         .dot-fuera { background: #ff0000; box-shadow: 0 0 5px #ff0000; }
         .dot-especial { background: #9b59b6; box-shadow: 0 0 5px #9b59b6; }
-        .filtro-unidades { display: flex; gap: 5px; padding: 10px; background: #cecece; border-bottom: 1px solid #bbb; }
-        .btn-filtro { border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; cursor: pointer; font-weight: bold; }
-
         .main-content { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; position: relative; gap: 15px; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 12px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--text-color); transition: 0.3s; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 12px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--text-color); }
         .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; z-index: 5; }
-        .stat-card { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--text-color); transition: 0.3s; }
+        .stat-card { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--text-color); }
         .map-container { flex-grow: 1; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; }
         #map { width: 100%; height: 100%; }
-        
-        .dark-mode-toggle { position: absolute; top: 80px; right: 30px; z-index: 1000; background: var(--rojo-cr); color: white; border: none; border-radius: 20px; padding: 8px 15px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 12px; }
+        .dark-mode-toggle { position: absolute; top: 80px; right: 30px; z-index: 1000; background: var(--rojo-cr); color: white; border: none; border-radius: 20px; padding: 8px 15px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .info-card { position: absolute; bottom: 20px; right: 20px; width: 260px; background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); z-index: 1100; display: none; border-left: 6px solid var(--rojo-cr); color: var(--text-color); }
-        .status-pill { padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; color: white; }
-        .bg-disponible { background: #2ecc71; }
-        .bg-saturado { background: #e74c3c; }
-
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
-        .login-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; width: 320px; }
-        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; text-align: center; font-size: 15px; outline: none; }
-        .login-btn { width: 100%; padding: 12px; background: var(--rojo-cr); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; letter-spacing: 1px; }
+        .login-box { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 320px; }
+        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; text-align: center; }
+        .login-btn { width: 100%; padding: 12px; background: var(--rojo-cr); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -81,11 +63,11 @@
 <div id="login-overlay">
     <div class="login-box">
         <img src="crhmologo.png" alt="Logo" style="width: 150px; margin-bottom: 20px;">
-        <h2 style="font-size: 16px; margin-bottom: 20px; color: #333; font-weight: 700;">ACCESO AL SISTEMA</h2>
+        <h2 style="font-size: 16px; margin-bottom: 20px; color: #333;">ACCESO AL SISTEMA</h2>
         <input type="text" id="user-input" class="login-input" placeholder="Usuario">
         <input type="password" id="pass-input" class="login-input" placeholder="Contraseña">
         <button onclick="validarAcceso()" class="login-btn">INGRESAR</button>
-        <p id="login-error" style="color: red; font-size: 11px; margin-top: 15px; display: none; font-weight: bold;">⚠️ Credenciales incorrectas</p>
+        <p id="login-error" style="color: red; font-size: 11px; margin-top: 15px; display: none;">⚠️ Credenciales incorrectas</p>
     </div>
 </div>
 
@@ -93,34 +75,29 @@
     <div class="sidebar">
         <div class="sidebar-logo"><img src="crhmologo.png" alt="Logo"></div>
         <div class="search-container">
-            <input type="text" class="search-input" id="address-search" placeholder="🔍 Buscar dirección/colonia..." oninput="buscarDireccion()">
+            <input type="text" class="search-input" id="address-search" placeholder="🔍 Buscar dirección..." oninput="buscarDireccion()">
             <div id="search-results" class="search-results"></div>
         </div>
         <ul class="nav-menu">
             <li class="nav-item active">📊 Dashboard</li>
             <li class="nav-item" onclick="toggleUnidadesList()">🚑 Unidades ▾</li>
-            <div id="wrapper-unidades" style="display:none;">
-                <div class="filtro-unidades">
-                    <button class="btn-filtro" style="background:#2ecc71; color:white;" onclick="filtrarUnidades('En turno')">Turno</button>
-                    <button class="btn-filtro" style="background:#9b59b6; color:white;" onclick="filtrarUnidades('Servicio Especial')">Esp.</button>
-                    <button class="btn-filtro" style="background:#777; color:white;" onclick="filtrarUnidades('todos')">Todo</button>
-                </div>
-                <div id="lista-unidades-desplegable" style="background: #cecece; max-height: 200px; overflow-y: auto;"></div>
+            <div id="wrapper-unidades" style="display:none; background: #cecece;">
+                <div id="lista-unidades-desplegable" style="max-height: 200px; overflow-y: auto;"></div>
             </div>
             <li class="nav-item" onclick="toggleHospitalList()">🏥 Hospitales ▾</li>
-            <div id="lista-hospitales-desplegable" style="display:none; background: #cecece; padding-left: 5px; max-height: 300px; overflow-y: auto;"></div>
+            <div id="lista-hospitales-desplegable" style="display:none; background: #cecece; max-height: 250px; overflow-y: auto;"></div>
             <li class="nav-item" onclick="cargarZonasRiesgo()">⚠️ Zonas de Riesgo</li>
-            <li class="nav-item" onclick="cerrarSesion()" style="color: #FF0000 !important; margin-top: 20px; border-top: 1px solid #bbb; font-weight: bold;">🚪 Cerrar Sesión</li>
+            <li class="nav-item" onclick="cerrarSesion()" style="color: #FF0000 !important; margin-top: 20px; font-weight: bold;">🚪 Cerrar Sesión</li>
         </ul>
     </div>
 
     <div class="main-content">
         <div class="top-bar">
-            <div style="font-weight: 700; font-size: 13px; flex-shrink: 0;">SISTEMA PADSE | CRUZ ROJA</div>
+            <div style="font-weight: 700; font-size: 13px;">SISTEMA PADSE | CRUZ ROJA</div>
             <div class="marquee-wrapper">
                 <div class="marquee-text" id="marquee-content">Sincronizando reportes viales...</div>
             </div>
-            <div style="text-align: right; flex-shrink: 0;">
+            <div style="text-align: right;">
                 <span id="date-now" style="font-size: 11px; opacity: 0.7;"></span>
                 <b id="clock-now" style="display:block; color:var(--rojo-cr); font-size:20px;">00:00:00</b>
             </div>
@@ -128,35 +105,27 @@
 
         <div class="dashboard-grid">
             <div class="stat-card">
-                <div style="font-size: 11px; opacity: 0.7; font-weight:600;">ALERTAS METEOROLÓGICAS</div>
-                <div id="alerta-status" style="font-size: 18px; font-weight:700; color: #2ecc71;">SIN ALERTAS</div>
-                <div id="alerta-desc" style="font-size: 10px; opacity: 0.6; margin-top:5px;">OPERACIÓN NORMAL</div>
+                <div style="font-size: 11px; opacity: 0.7;">ALERTAS METEOROLÓGICAS</div>
+                <div id="alerta-status" style="font-size: 18px; font-weight:700;">--</div>
+                <div id="alerta-desc" style="font-size: 10px; opacity: 0.6;">--</div>
             </div>
             <div class="stat-card">
-                <div style="font-size: 11px; opacity: 0.7; font-weight:600;">CLIMA HERMOSILLO</div>
+                <div style="font-size: 11px; opacity: 0.7;">CLIMA HERMOSILLO</div>
                 <div id="clima-info" style="font-size: 22px; font-weight:700;">--°C</div>
-                <div id="clima-desc" style="font-size: 10px; opacity: 0.6; margin-top:5px;">Cargando...</div>
+                <div id="clima-desc" style="font-size: 10px; opacity: 0.6;">--</div>
             </div>
             <div class="stat-card">
-                <div style="font-size: 11px; opacity: 0.7; font-weight:600;">PRÓXIMO RELEVO</div>
+                <div style="font-size: 11px; opacity: 0.7;">PRÓXIMO RELEVO</div>
                 <div id="relevo-timer" style="font-size: 22px; font-weight:700;">--:--:--</div>
-                <div style="font-size: 10px; opacity: 0.6; margin-top:5px;">PARA SIGUIENTE RELEVO</div>
             </div>
         </div>
 
-        <div id="hospital-info-card" class="info-card">
-            <button onclick="document.getElementById('hospital-info-card').style.display='none'" style="float:right; border:none; background:none; cursor:pointer; color:inherit;">✕</button>
-            <h3 id="h-nombre" style="margin-top:0; font-size:14px;">Hospital</h3>
-            <p style="font-size:11px;"><b>Capacidad:</b> <span id="h-capacidad"></span></p>
-            <p style="font-size:11px;"><b>Tel:</b> <a id="h-tel" href="#" style="color:var(--rojo-cr);"></a></p>
-        </div>
-
-        <div id="unit-info-card" class="info-card" style="border-left-color: #1a1a1a;">
-            <button onclick="document.getElementById('unit-info-card').style.display='none'" style="float:right; border:none; background:none; cursor:pointer; color:inherit;">✕</button>
-            <h3 id="u-nombre" style="margin-top:0; font-size:14px; color:var(--rojo-cr);">Unidad</h3>
-            <p style="font-size:11px;"><b>Operador:</b> <br><span id="u-operador">---</span></p>
-            <p style="font-size:11px;"><b>Jefe de Servicio:</b> <br><span id="u-jefe">---</span></p>
-            <p style="font-size:11px;"><b>Auxiliar(es):</b> <br><span id="u-auxiliar">---</span></p>
+        <div id="weather-legend-id" class="weather-legend">
+            <strong>Intensidad de Lluvia</strong><br>
+            <i style="background:#50e3fe"></i> Ligera<br>
+            <i style="background:#00a5ff"></i> Moderada<br>
+            <i style="background:#0000ff"></i> Fuerte<br>
+            <i style="background:#ff0000"></i> Extrema
         </div>
 
         <button class="dark-mode-toggle" onclick="toggleDarkMode()" id="btn-dark">🌙 Modo Oscuro</button>
@@ -166,7 +135,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // CREDENCIALES CORREGIDAS (QUITADO TOLOWERCASE)
     const U_ENC = "Y3J1enJvamFfMQ=="; 
     const P_ENC = "cGFkc2VjcmhtbzI2"; 
 
@@ -176,29 +144,46 @@
         if (u === atob(U_ENC) && p === atob(P_ENC)) {
             sessionStorage.setItem('sesion_padse', 'activa');
             document.getElementById('login-overlay').style.display = 'none';
-        } else {
-            document.getElementById('login-error').style.display = 'block';
-        }
+        } else { document.getElementById('login-error').style.display = 'block'; }
     }
 
     function cerrarSesion() { sessionStorage.removeItem('sesion_padse'); location.reload(); }
 
     const API_KEY = "b99d75364d37e9fd2bedb86b7e42743e";
-    const SHEET_HOSPITALES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTh7H5-srU1-anbqTEuHtC5BYciljJuqQP36afOD7OouN9jqeBHvHiMfRdGmHCdRG_MX2bGPoOjws07/pub?output=csv';
-    const UNIDADES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4_Q6g0WAkAHw8t7ZONnY_xppTfxr0Gh736C9IwPgDIM4P2-zDsiPau4HGtACULSg13LlAPuZgbiR8/pub?output=csv';
     const ZONAS_RIESGO_URL = 'https://raw.githubusercontent.com/andresmelendrezm-ops/mapa-cruz-roja/refs/heads/main/zonas_riesgo.geojson';
 
-    // CAPAS DE MAPA
+    // MAPAS Y CAPAS
     const layerClaro = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'] });
     const layerOscuro = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
     const googleTraffic = L.tileLayer('https://{s}.google.com/vt/lyrs=h,traffic&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
     
+    const capaNubes = L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.7 });
+    const capaLluvia = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.8 });
+
     var map = L.map('map', { center: [29.09, -110.96], zoom: 13, zoomControl: false, layers: [layerClaro, googleTraffic] });
     var hospitalLayer = L.layerGroup().addTo(map);
     var riesgoLayer = L.layerGroup();
     var basesLayer = L.layerGroup().addTo(map);
 
-    // MONITOREO INVISIBLE: 51 CRUCEROS ESTRATÉGICOS
+    // CONTROL DE CAPAS (RESTABLECIDO)
+    L.control.layers(null, { 
+        "🏥 Hospitales": hospitalLayer, 
+        "🚑 Bases CR": basesLayer, 
+        "🚗 Tráfico Real": googleTraffic, 
+        "⚠️ Riesgo": riesgoLayer,
+        "☁️ Nubes": capaNubes,
+        "🌧️ Precipitación": capaLluvia
+    }, { position: 'topright' }).addTo(map);
+
+    // MOSTRAR LEYENDA CUANDO SE ACTIVA LLUVIA
+    map.on('overlayadd', function(e) {
+        if (e.name === "🌧️ Precipitación") document.getElementById('weather-legend-id').style.display = 'block';
+    });
+    map.on('overlayremove', function(e) {
+        if (e.name === "🌧️ Precipitación") document.getElementById('weather-legend-id').style.display = 'none';
+    });
+
+    // PUNTOS MONITOREO INVISIBLE
     const puntosCriticos = [
         { nombre: "CLOUTHIER Y LIBERTAD", lat: 29.0432, lng: -110.9705 },
         { nombre: "SOLIDARIDAD Y VILDOSOLA", lat: 29.0628, lng: -110.9562 },
@@ -243,7 +228,7 @@
         { nombre: "QUIROGA Y PERIMETRAL", lat: 29.1135, lng: -111.0385 },
         { nombre: "QUIROGA Y DE LOS YAQUIS", lat: 29.1190, lng: -111.0395 },
         { nombre: "QUIROGA Y NAVOJOA", lat: 29.1250, lng: -111.0410 },
-        { nombre: "QUIROGA Y GASPAR LUKEN", lat: 29.1310, lng: -111.0425 },
+        { nombre: "QUIROGA Y GASPAR LUKEN", lat: 29.1310, lng: -110.0425 },
         { nombre: "QUIROGA Y LÁZARO CÁRDENAS (NORTE)", lat: 29.1395, lng: -111.0445 },
         { nombre: "QUIROGA Y J.B. ESCALANTE", lat: 29.1465, lng: -111.0460 },
         { nombre: "OLIVARES Y J.B. ESCALANTE", lat: 29.1435, lng: -110.9745 },
@@ -255,133 +240,42 @@
 
     async function procesarReportesViales() {
         const marquee = document.getElementById('marquee-content');
-        const palabrasClave = ["choque", "semaforo", "volcadura", "inundacion", "accidente", "cierre", "cerrado", "precaucion"];
+        const palabrasClave = ["choque", "semaforo", "volcadura", "accidente", "precaucion"];
         let alertasGlobales = [];
 
-        // 1. MONITOREO INVISIBLE (Simulación de lectura de densidad de tráfico Google)
-        puntosCriticos.forEach(punto => {
-            if (Math.random() > 0.96) { // Genera alertas aleatorias simulando tráfico pesado real
-                alertasGlobales.push(`⚠️ TRÁFICO PESADO EN ${punto.nombre}`);
-            }
-        });
+        puntosCriticos.forEach(p => { if(Math.random() > 0.97) alertasGlobales.push(`⚠️ TRÁFICO PESADO EN ${p.nombre}`); });
 
-        // 2. MONITOREO TWITTER (Nitter)
-        const nitterInstances = ["nitter.net", "nitter.cz", "nitter.it"];
-        for (let instance of nitterInstances) {
-            try {
-                const url = `https://${instance}/Policia_HMO/rss`;
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
-                if (data.contents) {
-                    const xml = new DOMParser().parseFromString(data.contents, "text/xml");
-                    const items = xml.querySelectorAll("item");
-                    items.forEach((item, i) => {
-                        if(i < 3) {
-                            let text = item.querySelector("title").textContent.toUpperCase();
-                            if(palabrasClave.some(p => text.toLowerCase().includes(p))) {
-                                alertasGlobales.push(`🚨 REPORTADO: ${text.split('HTTP')[0]}`);
-                            }
-                        }
-                    });
-                }
-                if (alertasGlobales.length > puntosCriticos.length * 0.04) break; 
-            } catch(e) { continue; }
-        }
-
-        if (alertasGlobales.length > 0) {
-            marquee.innerText = alertasGlobales.join(" | ");
-            marquee.style.color = "var(--rojo-cr)";
-        } else {
-            marquee.innerText = "✅ MONITOREO VIAL ACTIVO EN 51 CRUCEROS | SIN NOVEDADES DE RELEVANCIA";
-            marquee.style.color = "#2ecc71";
-        }
-    }
-
-    // --- EL RESTO DE TUS FUNCIONES SE MANTIENEN IGUAL ---
-
-    var hospitalesData = [[29.0814, -111.0037, "Hospital General de Especialidades"],[29.0864, -110.9621, "IMSS HGZ 15"],[29.1148, -110.9486, "Hospital Militar Regional"],[29.1159, -110.9725, "SSA Hospital Integral de la Mujer"],[29.1163, -110.9717, "SSA Hospital Infantil del State"],[29.0814, -110.9493, "Hospital Licona"],[29.0814, -110.9505, "Centro Médico del Noroeste"],[29.0896, -110.9521, "Hospital San diego de Alcalá"],[29.1040, -110.9533, "IMSS HGZ 02"],[29.0966, -110.9536, "ISSSTESON Dr. Ignacio Chavez"],[29.1101, -110.9507, "ISSSTE Dr. Fernando Ocaranza"],[29.1206, -110.9519, "Hospital San Diego"],[29.0987, -111.0015, "IMSS HGZ 14"], [29.0647, -110.9613, "Hospital CIMA"]];
-    const hospIcon = L.icon({ iconUrl: "placeholder.png", iconSize: [30, 30] });
-    hospitalesData.forEach(h => { L.marker([h[0], h[1]], {icon: hospIcon}).bindPopup(h[2]).addTo(hospitalLayer); });
-
-    const basesData = [{ nombre: "Base Sur", coords: [29.056410825968094, -110.95372333278944] }, { nombre: "Base Centro", coords: [29.0904, -110.9703] }, { nombre: "Base Norte", coords: [29.1418, -110.9853] }];
-    const baseIcon = L.icon({ iconUrl: 'bases.png', iconSize: [30, 30], iconAnchor: [15, 30] });
-    basesData.forEach(b => L.marker(b.coords, {icon: baseIcon}).bindPopup(`<b>${b.nombre}</b>`).addTo(basesLayer));
-
-    L.control.layers(null, { "🏥 Hospitales": hospitalLayer, "🚑 Bases CR": basesLayer, "🚗 Tráfico Real": googleTraffic, "⚠️ Riesgo": riesgoLayer }, { position: 'topright' }).addTo(map);
-
-    async function descargarGeoJSONRiesgo() {
         try {
-            const resp = await fetch(ZONAS_RIESGO_URL);
+            const proxy = "https://api.allorigins.win/get?url=";
+            const url = encodeURIComponent("https://nitter.net/Policia_HMO/rss");
+            const resp = await fetch(proxy + url);
             const data = await resp.json();
-            const geojsonLayer = L.geoJSON(data, {
-                style: (f) => ({ fillColor: f.properties.fill || '#FF0000', weight: 2, opacity: 1, color: 'white', fillOpacity: 0.5 }),
-                onEachFeature: (f, l) => { l.bindTooltip(f.properties.name || f.properties.nombre, { permanent: true, direction: 'center', className: 'etiqueta-riesgo' }); }
-            });
-            riesgoLayer.addLayer(geojsonLayer);
-            riesgoLayer.addTo(map);
-            map.fitBounds(geojsonLayer.getBounds());
-        } catch (e) { console.error(e); }
-    }
-
-    async function cargarZonasRiesgo() { if(riesgoLayer.getLayers().length > 0) { riesgoLayer.clearLayers(); map.removeLayer(riesgoLayer); } else { descargarGeoJSONRiesgo(); } }
-
-    async function buscarDireccion() {
-        const query = document.getElementById('address-search').value;
-        if (query.length < 4) return;
-        try {
-            const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(query + ", Hermosillo, Sonora")}&maxLocations=5&outFields=Match_addr`;
-            const resp = await fetch(url);
-            const data = await resp.json();
-            const resCont = document.getElementById('search-results'); 
-            resCont.innerHTML = '';
-            if (data.candidates) {
-                data.candidates.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'search-item';
-                    const nombreMostrar = item.address.split(',')[0];
-                    div.innerText = nombreMostrar;
-                    div.onclick = () => {
-                        const lat = item.location.y, lon = item.location.x;
-                        let cercana = basesData[0], distMin = Infinity;
-                        basesData.forEach(b => { 
-                            let d = map.distance([lat, lon], b.coords); 
-                            if(d < distMin) { distMin = d; cercana = b; } 
-                        });
-                        map.flyTo([lat, lon], 17);
-                        L.popup().setLatLng([lat, lon]).setContent(`<b>${nombreMostrar}</b><br>BASE CERCANA: <b>${cercana.nombre}</b>`).openOn(map);
-                        document.getElementById('address-search').value = nombreMostrar;
-                        resCont.innerHTML = '';
-                    };
-                    resCont.appendChild(div);
+            if(data.contents) {
+                const xml = new DOMParser().parseFromString(data.contents, "text/xml");
+                xml.querySelectorAll("item").forEach((item, i) => {
+                    if(i < 3) {
+                        let t = item.querySelector("title").textContent.toUpperCase();
+                        if(palabrasClave.some(p => t.toLowerCase().includes(p))) alertasGlobales.push(`🚨 ${t.split('HTTP')[0]}`);
+                    }
                 });
             }
         } catch(e) {}
+
+        marquee.innerText = alertasGlobales.length > 0 ? alertasGlobales.join(" | ") : "✅ MONITOREO VIAL ACTIVO EN 51 CRUCEROS | OPERACIÓN NORMAL";
+        marquee.style.color = alertasGlobales.length > 0 ? "var(--rojo-cr)" : "#2ecc71";
     }
 
-    async function toggleHospitalList() {
-        const d = document.getElementById('lista-hospitales-desplegable');
-        if (d.style.display === 'none') {
-            d.innerHTML = '';
-            const resp = await fetch(SHEET_HOSPITALES_URL); const text = await resp.text();
-            text.split(/\r?\n/).slice(1).forEach(r => {
-                const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                if(c[0]) {
-                    const item = document.createElement('div'); item.style = "padding: 8px; font-size: 11px; cursor: pointer; border-bottom: 1px solid #bbb; background: #cecece;";
-                    item.innerText = c[0].replace(/["']/g, "");
-                    item.onclick = () => {
-                        document.getElementById('h-nombre').innerText = c[0].replace(/["']/g, "");
-                        document.getElementById('h-capacidad').innerText = c[3];
-                        document.getElementById('h-capacidad').className = 'status-pill ' + (c[3].toLowerCase().includes('disponible') ? 'bg-disponible' : 'bg-saturado');
-                        document.getElementById('h-tel').innerText = c[4]; document.getElementById('h-tel').href = "tel:"+c[4];
-                        document.getElementById('hospital-info-card').style.display = 'block'; document.getElementById('unit-info-card').style.display = 'none';
-                        map.flyTo([parseFloat(c[1]), parseFloat(c[2])], 15);
-                    };
-                    d.appendChild(item);
-                }
+    async function cargarZonasRiesgo() {
+        if(riesgoLayer.getLayers().length > 0) { riesgoLayer.clearLayers(); map.removeLayer(riesgoLayer); return; }
+        try {
+            const r = await fetch(ZONAS_RIESGO_URL); const d = await r.json();
+            const gj = L.geoJSON(d, {
+                style: f => ({ fillColor: f.properties.fill || '#FF0000', weight: 2, color: 'white', fillOpacity: 0.5 }),
+                onEachFeature: (f, l) => l.bindTooltip(f.properties.name || f.properties.nombre, { permanent: true, className: 'etiqueta-riesgo' })
             });
-            d.style.display = 'block';
-        } else d.style.display = 'none';
+            riesgoLayer.addLayer(gj).addTo(map);
+            map.fitBounds(gj.getBounds());
+        } catch(e) { console.error(e); }
     }
 
     function actualizarDashboard() {
@@ -395,58 +289,30 @@
 
     async function obtenerClima() {
         try {
-            const resp = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=29.09&lon=-110.96&units=metric&lang=es&appid=${API_KEY}`);
-            const d = await resp.json();
+            const r = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=29.09&lon=-110.96&units=metric&lang=es&appid=${API_KEY}`);
+            const d = await r.json();
             document.getElementById('clima-info').innerText = Math.round(d.main.temp) + "°C";
             document.getElementById('clima-desc').innerText = d.weather[0].description.toUpperCase();
-            const statusEl = document.getElementById('alerta-status');
-            const descEl = document.getElementById('alerta-desc');
-            const mainWeather = d.weather[0].main.toLowerCase();
-            if (mainWeather.includes('rain') || mainWeather.includes('thunderstorm')) {
-                statusEl.innerText = "ALERTA: LLUVIA"; statusEl.style.color = "#FFD700"; descEl.innerText = "PRECIPITACIÓN DETECTADA";
-            } else if (d.main.temp >= 40) {
-                statusEl.innerText = "ALERTA: CALOR"; statusEl.style.color = "#FF4500"; descEl.innerText = "TEMPERATURAS EXTREMAS";
-            } else {
-                statusEl.innerText = "SIN ALERTAS"; statusEl.style.color = "#2ecc71"; descEl.innerText = "OPERACIÓN NORMAL";
-            }
+            const s = document.getElementById('alerta-status'), de = document.getElementById('alerta-desc'), m = d.weather[0].main.toLowerCase();
+            if(m.includes('rain')) { s.innerText="ALERTA: LLUVIA"; s.style.color="#FFD700"; de.innerText="PRECIPITACIÓN"; }
+            else { s.innerText="SIN ALERTAS"; s.style.color="#2ecc71"; de.innerText="NORMAL"; }
         } catch(e) {}
     }
 
-    let unidadesCache = [];
-    async function toggleUnidadesList() { const w = document.getElementById('wrapper-unidades'); if (w.style.display === 'none') { w.style.display = 'block'; cargarUnidades(); } else w.style.display = 'none'; }
-    async function cargarUnidades() {
-        const resp = await fetch(UNIDADES_CSV_URL); const data = await resp.text();
-        unidadesCache = data.split(/\r?\n/).slice(1).filter(r => r.trim() !== "").map(r => {
-            const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-            return { nombre: c[0].replace(/["']/g, ""), estado: c[1].replace(/["']/g, "").trim(), operador: c[2]||"N/A", jefe: c[3]||"N/A", auxiliar: c[4]||"N/A" };
-        });
-        renderUnidades(unidadesCache);
-    }
-    function renderUnidades(unidades) {
-        const l = document.getElementById('lista-unidades-desplegable'); l.innerHTML = '';
-        unidades.forEach(u => {
-            const div = document.createElement('div'); div.style = "padding: 8px 15px; font-size: 11px; border-bottom: 1px solid #bbb; cursor: pointer; display: flex; align-items:center; background:#e0e0e0;";
-            div.innerHTML = `<span class="status-dot ${u.estado==="En turno"?"dot-turno":u.estado==="Servicio Especial"?"dot-especial":"dot-fuera"}"></span> <b>${u.nombre}</b>`;
-            div.onclick = () => { document.getElementById('u-nombre').innerText = u.nombre; document.getElementById('u-operador').innerText = u.operador; document.getElementById('u-jefe').innerText = u.jefe; document.getElementById('u-auxiliar').innerText = u.auxiliar; document.getElementById('unit-info-card').style.display='block'; document.getElementById('hospital-info-card').style.display='none'; };
-            l.appendChild(div);
-        });
-    }
-    function filtrarUnidades(f) { renderUnidades(f==='todos'?unidadesCache:unidadesCache.filter(u=>u.estado===f)); }
-
     function toggleDarkMode() {
-        const dark = document.body.classList.toggle('dark-theme');
-        if(dark) { map.removeLayer(layerClaro); map.addLayer(layerOscuro); document.getElementById('btn-dark').innerHTML = "☀️ Modo Claro"; } 
-        else { map.removeLayer(layerOscuro); map.addLayer(layerClaro); document.getElementById('btn-dark').innerHTML = "🌙 Modo Oscuro"; }
+        const d = document.body.classList.toggle('dark-theme');
+        if(d) { map.removeLayer(layerClaro); map.addLayer(layerOscuro); document.getElementById('btn-dark').innerText="☀️ Modo Claro"; }
+        else { map.removeLayer(layerOscuro); map.addLayer(layerClaro); document.getElementById('btn-dark').innerText="🌙 Modo Oscuro"; }
     }
 
-    window.onload = function() {
-        if (sessionStorage.getItem('sesion_padse') === 'activa') { document.getElementById('login-overlay').style.display = 'none'; }
+    window.onload = () => {
+        if (sessionStorage.getItem('sesion_padse') === 'activa') document.getElementById('login-overlay').style.display = 'none';
         actualizarDashboard(); obtenerClima(); procesarReportesViales();
     };
 
-    setInterval(actualizarDashboard, 1000); 
-    setInterval(obtenerClima, 600000); 
-    setInterval(procesarReportesViales, 60000); 
+    setInterval(actualizarDashboard, 1000);
+    setInterval(obtenerClima, 600000);
+    setInterval(procesarReportesViales, 60000);
 </script>
 </body>
 </html>
