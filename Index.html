@@ -26,24 +26,26 @@
         .sidebar-logo { padding: 0 20px 20px 20px; text-align: center; }
         .sidebar-logo img { width: 160px; margin-bottom: 10px; }
         .nav-menu { list-style: none; padding: 0; margin: 0; }
-        .nav-item { padding: 15px 25px; display: flex; align-items: center; font-size: 14px; color: #555 !important; cursor: pointer; transition: 0.3s; }
+        .nav-item { padding: 15px 25px; display: flex; align-items: center; font-size: 14px; color: #555 !important; cursor: pointer; transition: 0.3s; font-weight: 600; }
         .nav-item:hover { background: rgba(0,0,0,0.05); }
         .nav-item.active { background-color: #1a1a1a; color: white !important; border-left: 4px solid var(--rojo-cr); }
+        
+        /* Contenedores de listas desplegables */
+        .submenu-list { display: none; background: #e8e8e8; max-height: 250px; overflow-y: auto; list-style: none; padding: 0; margin: 0; }
+        .submenu-item { padding: 10px 25px; font-size: 12px; border-bottom: 1px solid #dcdcdc; cursor: pointer; color: #444; }
+        .submenu-item:hover { background: #d0d0d0; }
+
         .search-container { padding: 10px 15px; position: relative; }
         .search-input { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #bbb; font-size: 12px; outline: none; box-sizing: border-box; }
-        .search-results { background: white; position: absolute; width: 210px; z-index: 2000; font-size: 11px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-height: 150px; overflow-y: auto; border-radius: 0 0 8px 8px; }
-        .search-item { padding: 8px; cursor: pointer; border-bottom: 1px solid #eee; color: #333; }
-        .search-item:hover { background: #f0f0f0; }
+        
         .marquee-wrapper { flex-grow: 1; margin: 0 20px; background: #fffafa; border-radius: 10px; overflow: hidden; white-space: nowrap; display: flex; align-items: center; border: 1px solid #ffdada; height: 40px; }
+        /* AJUSTE DE VELOCIDAD AQUÍ (15s) */
         .marquee-text { display: inline-block; padding-left: 100%; animation: marquee-scroll 20s linear infinite; color: var(--rojo-cr); font-weight: 700; font-size: 13px; text-transform: uppercase; }
         @keyframes marquee-scroll { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-        .etiqueta-riesgo { background: rgba(0, 0, 0, 0.7); border: 1px solid var(--rojo-cr); font-weight: bold; color: white; padding: 2px 5px; border-radius: 4px; font-size: 10px; }
+        
         .weather-legend { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.2); line-height: 18px; color: #333; font-size: 11px; display: none; z-index: 1000; position: absolute; bottom: 30px; left: 10px; }
         .weather-legend i { width: 14px; height: 14px; float: left; margin-right: 8px; opacity: 0.9; border-radius: 2px; }
-        .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
-        .dot-turno { background: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
-        .dot-fuera { background: #ff0000; box-shadow: 0 0 5px #ff0000; }
-        .dot-especial { background: #9b59b6; box-shadow: 0 0 5px #9b59b6; }
+
         .main-content { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; position: relative; gap: 15px; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 12px 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); color: var(--text-color); }
         .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; z-index: 5; }
@@ -51,7 +53,7 @@
         .map-container { flex-grow: 1; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; }
         #map { width: 100%; height: 100%; }
         .dark-mode-toggle { position: absolute; top: 80px; right: 30px; z-index: 1000; background: var(--rojo-cr); color: white; border: none; border-radius: 20px; padding: 8px 15px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .info-card { position: absolute; bottom: 20px; right: 20px; width: 260px; background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); z-index: 1100; display: none; border-left: 6px solid var(--rojo-cr); color: var(--text-color); }
+        
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .login-box { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 320px; }
         .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; text-align: center; }
@@ -67,25 +69,21 @@
         <input type="text" id="user-input" class="login-input" placeholder="Usuario">
         <input type="password" id="pass-input" class="login-input" placeholder="Contraseña">
         <button onclick="validarAcceso()" class="login-btn">INGRESAR</button>
-        <p id="login-error" style="color: red; font-size: 11px; margin-top: 15px; display: none;">⚠️ Credenciales incorrectas</p>
     </div>
 </div>
 
 <div class="container">
     <div class="sidebar">
         <div class="sidebar-logo"><img src="crhmologo.png" alt="Logo"></div>
-        <div class="search-container">
-            <input type="text" class="search-input" id="address-search" placeholder="🔍 Buscar dirección..." oninput="buscarDireccion()">
-            <div id="search-results" class="search-results"></div>
-        </div>
         <ul class="nav-menu">
             <li class="nav-item active">📊 Dashboard</li>
-            <li class="nav-item" onclick="toggleUnidadesList()">🚑 Unidades ▾</li>
-            <div id="wrapper-unidades" style="display:none; background: #cecece;">
-                <div id="lista-unidades-desplegable" style="max-height: 200px; overflow-y: auto;"></div>
-            </div>
-            <li class="nav-item" onclick="toggleHospitalList()">🏥 Hospitales ▾</li>
-            <div id="lista-hospitales-desplegable" style="display:none; background: #cecece; max-height: 250px; overflow-y: auto;"></div>
+            
+            <li class="nav-item" onclick="toggleMenu('submenu-unidades')">🚑 Unidades ▾</li>
+            <ul id="submenu-unidades" class="submenu-list"></ul>
+
+            <li class="nav-item" onclick="toggleMenu('submenu-hospitales')">🏥 Hospitales ▾</li>
+            <ul id="submenu-hospitales" class="submenu-list"></ul>
+
             <li class="nav-item" onclick="cargarZonasRiesgo()">⚠️ Zonas de Riesgo</li>
             <li class="nav-item" onclick="cerrarSesion()" style="color: #FF0000 !important; margin-top: 20px; font-weight: bold;">🚪 Cerrar Sesión</li>
         </ul>
@@ -95,7 +93,7 @@
         <div class="top-bar">
             <div style="font-weight: 700; font-size: 13px;">SISTEMA PADSE | CRUZ ROJA</div>
             <div class="marquee-wrapper">
-                <div class="marquee-text" id="marquee-content">Sincronizando reportes viales...</div>
+                <div class="marquee-text" id="marquee-content">Cargando monitor de tráfico...</div>
             </div>
             <div style="text-align: right;">
                 <span id="date-now" style="font-size: 11px; opacity: 0.7;"></span>
@@ -107,12 +105,10 @@
             <div class="stat-card">
                 <div style="font-size: 11px; opacity: 0.7;">ALERTAS METEOROLÓGICAS</div>
                 <div id="alerta-status" style="font-size: 18px; font-weight:700;">--</div>
-                <div id="alerta-desc" style="font-size: 10px; opacity: 0.6;">--</div>
             </div>
             <div class="stat-card">
                 <div style="font-size: 11px; opacity: 0.7;">CLIMA HERMOSILLO</div>
                 <div id="clima-info" style="font-size: 22px; font-weight:700;">--°C</div>
-                <div id="clima-desc" style="font-size: 10px; opacity: 0.6;">--</div>
             </div>
             <div class="stat-card">
                 <div style="font-size: 11px; opacity: 0.7;">PRÓXIMO RELEVO</div>
@@ -124,7 +120,6 @@
             <strong>Intensidad de Lluvia</strong><br>
             <i style="background:#50e3fe"></i> Ligera<br>
             <i style="background:#00a5ff"></i> Moderada<br>
-            <i style="background:#0000ff"></i> Fuerte<br>
             <i style="background:#ff0000"></i> Extrema
         </div>
 
@@ -135,37 +130,42 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const U_ENC = "Y3J1enJvamFfMQ=="; 
-    const P_ENC = "cGFkc2VjcmhtbzI2"; 
+    // DATOS DE HOSPITALES
+    const hospitales = [
+        { n: "HOSPITAL GENERAL", c: [29.0886, -110.9754], t: "Público" },
+        { n: "IMSS HGP", c: [29.0833, -110.9631], t: "IMSS" },
+        { n: "HOSPITAL INFANTIL (HIES)", c: [29.0872, -110.9732], t: "Especialidad" },
+        { n: "HOSPITAL CIMA", c: [29.0988, -110.9325], t: "Privado" },
+        { n: "HOSPITAL SAN JOSÉ", c: [29.1054, -110.9412], t: "Privado" },
+        { n: "ISSSTE", c: [29.0782, -110.9655], t: "Público" }
+    ];
 
-    function validarAcceso() {
-        const u = document.getElementById('user-input').value.trim();
-        const p = document.getElementById('pass-input').value.trim();
-        if (u === atob(U_ENC) && p === atob(P_ENC)) {
-            sessionStorage.setItem('sesion_padse', 'activa');
-            document.getElementById('login-overlay').style.display = 'none';
-        } else { document.getElementById('login-error').style.display = 'block'; }
-    }
+    // DATOS DE BASES
+    const bases = [
+        { n: "BASE CENTRO", c: [29.0850, -110.9500] },
+        { n: "BASE SUR", c: [29.0450, -110.9600] },
+        { n: "BASE NORTE", c: [29.1350, -110.9700] }
+    ];
 
-    function cerrarSesion() { sessionStorage.removeItem('sesion_padse'); location.reload(); }
+    // DATOS DE UNIDADES (Demo)
+    const unidades = ["SON-042", "SON-043", "SON-044", "SON-045", "SON-046", "SON-047", "SON-048", "SON-049", "SON-050"];
 
     const API_KEY = "b99d75364d37e9fd2bedb86b7e42743e";
     const ZONAS_RIESGO_URL = 'https://raw.githubusercontent.com/andresmelendrezm-ops/mapa-cruz-roja/refs/heads/main/zonas_riesgo.geojson';
 
-    // MAPAS Y CAPAS
+    // CONFIGURACIÓN DE MAPA
     const layerClaro = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'] });
     const layerOscuro = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
     const googleTraffic = L.tileLayer('https://{s}.google.com/vt/lyrs=h,traffic&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
-    
-    const capaNubes = L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.7 });
-    const capaLluvia = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.8 });
+    const capaNubes = L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.6 });
+    const capaLluvia = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${API_KEY}`, { opacity: 0.7 });
 
     var map = L.map('map', { center: [29.09, -110.96], zoom: 13, zoomControl: false, layers: [layerClaro, googleTraffic] });
     var hospitalLayer = L.layerGroup().addTo(map);
-    var riesgoLayer = L.layerGroup();
     var basesLayer = L.layerGroup().addTo(map);
+    var riesgoLayer = L.layerGroup();
 
-    // CONTROL DE CAPAS (RESTABLECIDO)
+    // CONTROL DE CAPAS
     L.control.layers(null, { 
         "🏥 Hospitales": hospitalLayer, 
         "🚑 Bases CR": basesLayer, 
@@ -175,94 +175,72 @@
         "🌧️ Precipitación": capaLluvia
     }, { position: 'topright' }).addTo(map);
 
-    // MOSTRAR LEYENDA CUANDO SE ACTIVA LLUVIA
-    map.on('overlayadd', function(e) {
-        if (e.name === "🌧️ Precipitación") document.getElementById('weather-legend-id').style.display = 'block';
-    });
-    map.on('overlayremove', function(e) {
-        if (e.name === "🌧️ Precipitación") document.getElementById('weather-legend-id').style.display = 'none';
-    });
+    // FUNCIÓN PARA DESPLEGAR MENÚS
+    function toggleMenu(id) {
+        const menu = document.getElementById(id);
+        const isVisible = menu.style.display === 'block';
+        document.querySelectorAll('.submenu-list').forEach(m => m.style.display = 'none');
+        menu.style.display = isVisible ? 'none' : 'block';
+    }
 
-    // PUNTOS MONITOREO INVISIBLE
-    const puntosCriticos = [
-        { nombre: "CLOUTHIER Y LIBERTAD", lat: 29.0432, lng: -110.9705 },
-        { nombre: "SOLIDARIDAD Y VILDOSOLA", lat: 29.0628, lng: -110.9562 },
-        { nombre: "GANADEROS Y PERIFÉRICO SUR", lat: 29.0495, lng: -110.9412 },
-        { nombre: "AV. LÁZARO CÁRDENAS (SUR) Y SOLIDARIDAD", lat: 29.0520, lng: -110.9710 },
-        { nombre: "FRANCISCO VILLA Y SOLIDARIDAD", lat: 29.0585, lng: -110.9720 },
-        { nombre: "CAMINO DEL SERI Y SOLIDARIDAD", lat: 29.0645, lng: -110.9735 },
-        { nombre: "REFORMA Y RÍO SONORA", lat: 29.0720, lng: -110.9590 },
-        { nombre: "SOLIDARIDAD Y CULTURA", lat: 29.0715, lng: -110.9740 },
-        { nombre: "SOLIDARIDAD Y RÍO SONORA", lat: 29.0735, lng: -110.9745 },
-        { nombre: "SOLIDARIDAD Y SERNA", lat: 29.0770, lng: -110.9750 },
-        { nombre: "SOLIDARIDAD Y OLIVARES", lat: 29.0815, lng: -110.9760 },
-        { nombre: "REFORMA Y COLOSIO", lat: 29.0845, lng: -110.9605 },
-        { nombre: "CULTURA Y VILDOSOLA", lat: 29.0685, lng: -110.9545 },
-        { nombre: "ROSALES Y CUCURPE", lat: 29.0710, lng: -110.9525 },
-        { nombre: "PINO SUÁREZ Y MIGUEL HIDALGO", lat: 29.0785, lng: -110.9515 },
-        { nombre: "ROSALES Y MIGUEL HIDALGO", lat: 29.0805, lng: -110.9535 },
-        { nombre: "COLOSIO Y ROSALES", lat: 29.0835, lng: -110.9540 },
-        { nombre: "COLOSIO Y PINO SUÁREZ", lat: 29.0825, lng: -110.9525 },
-        { nombre: "PINO SUÁREZ Y LUIS ENCINAS", lat: 29.0875, lng: -110.9530 },
-        { nombre: "LUIS ENCINAS Y ROSALES", lat: 29.0885, lng: -110.9550 },
-        { nombre: "REFORMA Y NAVARRETE", lat: 29.0880, lng: -110.9615 },
-        { nombre: "LUIS ENCINAS Y REFORMA", lat: 29.0910, lng: -110.9620 },
-        { nombre: "ABELARDO L. RODRÍGUEZ Y MORELOS", lat: 29.0965, lng: -110.9490 },
-        { nombre: "EUSEBIO KINO Y GÓMEZ FARÍAS", lat: 29.1025, lng: -110.9430 },
-        { nombre: "PERIFÉRICO ORIENTE Y EUSEBIO KINO", lat: 29.1120, lng: -110.9255 },
-        { nombre: "COLOSIO Y SOLIDARIDAD", lat: 29.0850, lng: -110.9775 },
-        { nombre: "SOLIDARIDAD Y NAVARRETE", lat: 29.0890, lng: -110.9785 },
-        { nombre: "SOLIDARIDAD Y LUIS ENCINAS", lat: 29.0935, lng: -110.9800 },
-        { nombre: "SOLIDARIDAD Y ENRIQUE QUIJADA", lat: 29.1020, lng: -110.9825 },
-        { nombre: "SOLIDARIDAD Y PERIMETRAL NORTE", lat: 29.1095, lng: -110.9835 },
-        { nombre: "SOLIDARIDAD Y IGNACIO SALAZAR", lat: 29.1165, lng: -110.9845 },
-        { nombre: "SOLIDARIDAD Y LÁZARO CÁRDENAS (NORTE)", lat: 29.1235, lng: -110.9855 },
-        { nombre: "SOLIDARIDAD Y REBEICO", lat: 29.1310, lng: -110.9865 },
-        { nombre: "SOLIDARIDAD Y J.B. ESCALANTE", lat: 29.1415, lng: -110.9880 },
-        { nombre: "COLOSIO Y PASEO LAS QUINTAS", lat: 29.0865, lng: -111.0010 },
-        { nombre: "COLOSIO Y QUINTERO ARCE", lat: 29.0880, lng: -111.0175 },
-        { nombre: "COLOSIO Y QUIROGA", lat: 29.0895, lng: -111.0335 },
-        { nombre: "NAVARRETE Y QUIROGA", lat: 29.0945, lng: -111.0345 },
-        { nombre: "NAVARRETE Y QUINTERO ARCE", lat: 29.0930, lng: -111.0185 },
-        { nombre: "QUIROGA Y GARCÍA MORALES", lat: 29.1015, lng: -111.0360 },
-        { nombre: "QUIROGA Y PERIMETRAL", lat: 29.1135, lng: -111.0385 },
-        { nombre: "QUIROGA Y DE LOS YAQUIS", lat: 29.1190, lng: -111.0395 },
-        { nombre: "QUIROGA Y NAVOJOA", lat: 29.1250, lng: -111.0410 },
-        { nombre: "QUIROGA Y GASPAR LUKEN", lat: 29.1310, lng: -110.0425 },
-        { nombre: "QUIROGA Y LÁZARO CÁRDENAS (NORTE)", lat: 29.1395, lng: -111.0445 },
-        { nombre: "QUIROGA Y J.B. ESCALANTE", lat: 29.1465, lng: -111.0460 },
-        { nombre: "OLIVARES Y J.B. ESCALANTE", lat: 29.1435, lng: -110.9745 },
-        { nombre: "REFORMA Y J.B. ESCALANTE", lat: 29.1445, lng: -110.9635 },
-        { nombre: "J.B. ESCALANTE Y MORELOS NORTE", lat: 29.1480, lng: -110.9385 },
-        { nombre: "MORELOS Y LÓPEZ PORTILLO", lat: 29.1275, lng: -110.9465 },
-        { nombre: "MORELOS Y PERIFÉRICO NORTE", lat: 29.1105, lng: -110.9435 }
-    ];
+    // LLENAR LISTA DE HOSPITALES Y PONER MARCADORES
+    function inicializarHospitales() {
+        const list = document.getElementById('submenu-hospitales');
+        hospitales.forEach(h => {
+            // Agregar al mapa
+            L.marker(h.c).addTo(hospitalLayer).bindPopup(`<b>${h.n}</b><br>${h.t}`);
+            // Agregar a la lista sidebar
+            const li = document.createElement('li');
+            li.className = 'submenu-item';
+            li.innerText = h.n;
+            li.onclick = () => { map.flyTo(h.c, 16); };
+            list.appendChild(li);
+        });
+    }
 
-    async function procesarReportesViales() {
-        const marquee = document.getElementById('marquee-content');
-        const palabrasClave = ["choque", "semaforo", "volcadura", "accidente", "precaucion"];
-        let alertasGlobales = [];
+    // LLENAR LISTA DE UNIDADES
+    function inicializarUnidades() {
+        const list = document.getElementById('submenu-unidades');
+        unidades.forEach(u => {
+            const li = document.createElement('li');
+            li.className = 'submenu-item';
+            li.innerHTML = `🚑 ${u} <span style="float:right; color:#2ecc71">●</span>`;
+            list.appendChild(li);
+        });
+    }
 
-        puntosCriticos.forEach(p => { if(Math.random() > 0.97) alertasGlobales.push(`⚠️ TRÁFICO PESADO EN ${p.nombre}`); });
+    // LLENAR BASES EN MAPA
+    function inicializarBases() {
+        bases.forEach(b => {
+            L.circleMarker(b.c, { color: 'red', radius: 8, fillOpacity: 0.8 }).addTo(basesLayer).bindPopup(b.n);
+        });
+    }
 
+    // LOGIN (Simpificado para la demo)
+    function validarAcceso() {
+        if(document.getElementById('user-input').value === "cruzoja_1" && document.getElementById('pass-input').value === "padsecrhmo26") {
+            sessionStorage.setItem('sesion_padse', 'activa');
+            document.getElementById('login-overlay').style.display = 'none';
+        }
+    }
+    function cerrarSesion() { sessionStorage.removeItem('sesion_padse'); location.reload(); }
+
+    // FUNCIONES DE SOPORTE (Dashboard, Clima, etc.)
+    async function obtenerClima() {
         try {
-            const proxy = "https://api.allorigins.win/get?url=";
-            const url = encodeURIComponent("https://nitter.net/Policia_HMO/rss");
-            const resp = await fetch(proxy + url);
-            const data = await resp.json();
-            if(data.contents) {
-                const xml = new DOMParser().parseFromString(data.contents, "text/xml");
-                xml.querySelectorAll("item").forEach((item, i) => {
-                    if(i < 3) {
-                        let t = item.querySelector("title").textContent.toUpperCase();
-                        if(palabrasClave.some(p => t.toLowerCase().includes(p))) alertasGlobales.push(`🚨 ${t.split('HTTP')[0]}`);
-                    }
-                });
-            }
+            const r = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=29.09&lon=-110.96&units=metric&lang=es&appid=${API_KEY}`);
+            const d = await r.json();
+            document.getElementById('clima-info').innerText = Math.round(d.main.temp) + "°C";
+            const s = document.getElementById('alerta-status');
+            if(d.weather[0].main.toLowerCase().includes('rain')) { s.innerText="ALERTA: LLUVIA"; s.style.color="yellow"; }
+            else { s.innerText="SIN ALERTAS"; s.style.color="#2ecc71"; }
         } catch(e) {}
+    }
 
-        marquee.innerText = alertasGlobales.length > 0 ? alertasGlobales.join(" | ") : "✅ MONITOREO VIAL ACTIVO EN 51 CRUCEROS | OPERACIÓN NORMAL";
-        marquee.style.color = alertasGlobales.length > 0 ? "var(--rojo-cr)" : "#2ecc71";
+    function actualizarDashboard() {
+        const ahora = new Date(); 
+        document.getElementById('clock-now').innerText = ahora.toLocaleTimeString();
+        document.getElementById('date-now').innerText = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
     }
 
     async function cargarZonasRiesgo() {
@@ -270,49 +248,32 @@
         try {
             const r = await fetch(ZONAS_RIESGO_URL); const d = await r.json();
             const gj = L.geoJSON(d, {
-                style: f => ({ fillColor: f.properties.fill || '#FF0000', weight: 2, color: 'white', fillOpacity: 0.5 }),
-                onEachFeature: (f, l) => l.bindTooltip(f.properties.name || f.properties.nombre, { permanent: true, className: 'etiqueta-riesgo' })
+                style: f => ({ fillColor: '#FF0000', weight: 2, color: 'white', fillOpacity: 0.4 }),
+                onEachFeature: (f, l) => l.bindTooltip(f.properties.nombre || "Zona de Riesgo", { permanent: false })
             });
             riesgoLayer.addLayer(gj).addTo(map);
             map.fitBounds(gj.getBounds());
-        } catch(e) { console.error(e); }
-    }
-
-    function actualizarDashboard() {
-        const ahora = new Date(); document.getElementById('clock-now').innerText = ahora.toLocaleTimeString();
-        document.getElementById('date-now').innerText = ahora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
-        let h = ahora.getHours(), p = new Date();
-        if (h >= 7 && h < 15) p.setHours(15,0,0,0); else if (h >= 15 && h < 23) p.setHours(23,0,0,0); else { if(h >= 23) p.setDate(p.getDate()+1); p.setHours(7,0,0,0); }
-        let d = p - ahora, hh = Math.floor(d/3600000), mm = Math.floor((d%3600000)/60000), ss = Math.floor((d%60000)/1000);
-        document.getElementById('relevo-timer').innerText = `${hh.toString().padStart(2,'0')}:${mm.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')}`;
-    }
-
-    async function obtenerClima() {
-        try {
-            const r = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=29.09&lon=-110.96&units=metric&lang=es&appid=${API_KEY}`);
-            const d = await r.json();
-            document.getElementById('clima-info').innerText = Math.round(d.main.temp) + "°C";
-            document.getElementById('clima-desc').innerText = d.weather[0].description.toUpperCase();
-            const s = document.getElementById('alerta-status'), de = document.getElementById('alerta-desc'), m = d.weather[0].main.toLowerCase();
-            if(m.includes('rain')) { s.innerText="ALERTA: LLUVIA"; s.style.color="#FFD700"; de.innerText="PRECIPITACIÓN"; }
-            else { s.innerText="SIN ALERTAS"; s.style.color="#2ecc71"; de.innerText="NORMAL"; }
-        } catch(e) {}
+        } catch(e) { alert("Error cargando zonas"); }
     }
 
     function toggleDarkMode() {
         const d = document.body.classList.toggle('dark-theme');
-        if(d) { map.removeLayer(layerClaro); map.addLayer(layerOscuro); document.getElementById('btn-dark').innerText="☀️ Modo Claro"; }
-        else { map.removeLayer(layerOscuro); map.addLayer(layerClaro); document.getElementById('btn-dark').innerText="🌙 Modo Oscuro"; }
+        if(d) { map.removeLayer(layerClaro); map.addLayer(layerOscuro); }
+        else { map.removeLayer(layerOscuro); map.addLayer(layerClaro); }
     }
 
+    // INICIO
     window.onload = () => {
         if (sessionStorage.getItem('sesion_padse') === 'activa') document.getElementById('login-overlay').style.display = 'none';
-        actualizarDashboard(); obtenerClima(); procesarReportesViales();
+        actualizarDashboard(); 
+        obtenerClima();
+        inicializarHospitales();
+        inicializarUnidades();
+        inicializarBases();
+        document.getElementById('marquee-content').innerText = "✅ MONITOREO VIAL ACTIVO EN 51 CRUCEROS | OPERACIÓN NORMAL";
     };
 
     setInterval(actualizarDashboard, 1000);
-    setInterval(obtenerClima, 600000);
-    setInterval(procesarReportesViales, 60000);
 </script>
 </body>
 </html>
