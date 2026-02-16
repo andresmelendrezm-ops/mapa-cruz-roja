@@ -40,9 +40,11 @@
         .map-container { flex-grow: 1; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         #map { width: 100%; height: 100%; }
         
+        /* LOGIN OVERLAY CORREGIDO */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a1a1a; z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 320px; }
-        .login-btn { width: 100%; padding: 12px; background: var(--rojo-cr); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .login-box { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .login-btn { width: 100%; padding: 12px; background: var(--rojo-cr); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .login-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -50,9 +52,9 @@
 <div id="login-overlay">
     <div class="login-box">
         <img src="crhmologo.png" alt="Logo" style="width: 150px; margin-bottom: 20px;">
-        <input type="text" id="user-input" style="width:100%; padding:10px; margin-bottom:10px;" placeholder="Usuario">
-        <input type="password" id="pass-input" style="width:100%; padding:10px; margin-bottom:10px;" placeholder="Contraseña">
-        <button onclick="validarAcceso()" class="login-btn">INGRESAR</button>
+        <input type="text" id="user-input" class="login-input" placeholder="Usuario">
+        <input type="password" id="pass-input" class="login-input" placeholder="Contraseña">
+        <button id="btn-ingresar" class="login-btn">INGRESAR</button>
     </div>
 </div>
 
@@ -97,23 +99,35 @@
                 <div id="relevo-timer" style="font-size: 22px; font-weight:700;">--:--:--</div>
             </div>
         </div>
-
         <div class="map-container"><div id="map"></div></div>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // Configuración y URLs
     const SHEET_HOSPITALES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTh7H5-srU1-anbqTEuHtC5BYciljJuqQP36afOD7OouN9jqeBHvHiMfRdGmHCdRG_MX2bGPoOjws07/pub?output=csv';
-    const UNIDADES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ4_Q6g0WAkAHw8t7ZONnY_xppTfxr0Gh736C9IwPgDIM4P2-zDsiPau4HGtACULSg13LlAPuZgbiR8/pub?output=csv';
     const API_CLIMA = "b99d75364d37e9fd2bedb86b7e42743e";
 
+    // Inicialización de Mapa
     var map = L.map('map', { center: [29.09, -110.96], zoom: 13, zoomControl: false });
     L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] }).addTo(map);
-    
     var hospitalLayer = L.layerGroup().addTo(map);
     const hospIcon = L.icon({ iconUrl: "placeholder.png", iconSize: [30, 30] });
 
+    // --- LOGICA DE ACCESO (REPARADA) ---
+    document.getElementById('btn-ingresar').onclick = function() {
+        const user = document.getElementById('user-input').value;
+        const pass = document.getElementById('pass-input').value;
+        
+        if(user === "cruzoja_1" && pass === "padsecrhmo26") {
+            document.getElementById('login-overlay').style.display = 'none';
+        } else {
+            alert("Credenciales incorrectas");
+        }
+    };
+
+    // --- BASE DE DATOS DE 51 CRUCEROS (RESTABLECIDA) ---
     const puntosCriticos = [
         { nombre: "CLOUTHIER Y LIBERTAD", lat: 29.0432, lng: -110.9705 },
         { nombre: "SOLIDARIDAD Y VILDOSOLA", lat: 29.0628, lng: -110.9562 },
@@ -168,6 +182,7 @@
         { nombre: "MORELOS Y PERIFÉRICO NORTE", lat: 29.1105, lng: -110.9435 }
     ];
 
+    // Funciones de Clima y Datos
     async function obtenerClima() {
         try {
             const resp = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=29.08&lon=-110.96&units=metric&appid=${API_CLIMA}&lang=es`);
@@ -203,7 +218,7 @@
     async function procesarReportesViales() {
         const marquee = document.getElementById('marquee-content');
         let alertas = [];
-        puntosCriticos.forEach(p => { if(Math.random() > 0.97) alertas.push(`⚠️ TRÁFICO PESADO EN ${p.nombre}`); });
+        puntosCriticos.forEach(p => { if(Math.random() > 0.97) alertas.push(`⚠️ TRÁFICO EN ${p.nombre}`); });
         marquee.innerText = alertas.length > 0 ? alertas.join(" | ") : "✅ MONITOREO VIAL ACTIVO EN 51 CRUCEROS | OPERACIÓN NORMAL";
     }
 
@@ -211,12 +226,6 @@
         const d = document.getElementById('lista-hospitales-desplegable');
         d.style.display = d.style.display === 'none' ? 'block' : 'none';
         if(d.style.display === 'block') cargarHospitales();
-    }
-
-    function validarAcceso() {
-        if(document.getElementById('user-input').value === "cruzoja_1" && document.getElementById('pass-input').value === "padsecrhmo26") {
-            document.getElementById('login-overlay').style.display = 'none';
-        }
     }
 
     window.onload = () => {
